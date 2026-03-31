@@ -3,7 +3,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { AboutUsScreen } from '../screens/AboutUsScreen';
 import { BookingFormScreen } from '../screens/BookingFormScreen';
-import { CancelAppointmentScreen } from '../screens/CancelAppointmentScreen';
 import { ConfirmationScreen } from '../screens/ConfirmationScreen';
 import { LandingScreen } from '../screens/LandingScreen';
 import { ReservationsScreen } from '../screens/ReservationsScreen';
@@ -49,11 +48,6 @@ export function RootNavigator() {
           name="Reservations"
           component={ReservationsScreen}
           options={{ title: 'Appointments' }}
-        />
-        <Stack.Screen
-          name="CancelAppointment"
-          component={CancelAppointmentScreen}
-          options={{ title: 'Cancel' }}
         />
         <Stack.Screen name="AboutUs" component={AboutUsScreen} options={{ title: 'About' }} />
       </Stack.Navigator>

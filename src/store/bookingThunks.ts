@@ -7,7 +7,7 @@ import { getResourceServices } from '../api/services';
 import { getAvailableSlots } from '../api/slots';
 import { getTenantBySlug } from '../api/tenants';
 import type { AppointmentPayload, Resource, ResourceService, Slot } from '../api/types';
-import { setGuestId } from '../lib/guestStorage';
+import { ensureInstallationId } from '../lib/guestStorage';
 
 export type TenantSummary = {
   id: string;
@@ -99,8 +99,8 @@ export const submitBooking = createAsyncThunk<
   'booking/submitBooking',
   async ({ tenantId, resourceName, serviceName, payload }, { rejectWithValue }) => {
     try {
-      const result = await createAppointment(tenantId, payload);
-      await setGuestId(result.guest.id);
+      const installationId = await ensureInstallationId();
+      const result = await createAppointment(tenantId, { ...payload, installationId });
       return {
         appointmentId: result.id,
         guestId: result.guest.id,

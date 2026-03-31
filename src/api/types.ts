@@ -49,6 +49,7 @@ export type Slot = {
 export type AppointmentPayload = {
   resourceId: string;
   serviceId: string;
+  installationId?: string;
   guest: {
     name: string;
     email: string;
@@ -74,4 +75,39 @@ export type AppointmentCreated = {
     name: string;
     email: string;
   };
+};
+
+/** Item from GET /tenants/:tenantId/appointments?guestId=... */
+export type GuestAppointment = {
+  id: string;
+  resourceId: string;
+  serviceId: string;
+  guestId: string;
+  startAt: string;
+  endAt: string;
+  status: 'scheduled' | 'completed' | 'canceled' | string;
+  priceAtBooking?: string;
+  notes?: string | null;
+  resource?: {
+    id: string;
+    firstName?: string;
+    lastName?: string;
+  };
+  service?: {
+    id: string;
+    name?: string;
+  };
+};
+
+/** Payload for PATCH /tenants/:tenantId/appointments/:id */
+export type CancelAppointmentPayload = {
+  guestId?: string;
+  installationId?: string;
+};
+
+/** Response from PATCH /tenants/:tenantId/appointments/:id */
+export type CanceledAppointment = {
+  id: string;
+  status: 'canceled' | string;
+  canceledAt?: string;
 };
