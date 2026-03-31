@@ -1,0 +1,36 @@
+{
+  "appName": "Terminko",
+  "landing": {
+    "title": "Book your visit",
+    "subtitle": "Choose an option to continue",
+    "book": "Schedule appointment",
+    "reservations": "My appointments",
+    "cancel": "Cancel appointment",
+    "about": "About us"
+  },
+  "screens": {
+    "resourceSelect": "Choose a provider",
+    "serviceSelect": "Choose a service",
+    "slotSelect": "Pick date & time",
+    "bookingForm": "Your details",
+    "confirmation": "Booking confirmed",
+    "reservations": "Your appointments",
+    "cancelAppointment": "Cancel with code",
+    "aboutUs": "About the salon",
+    "next": "Next",
+    "back": "Back"
+  },
+  "placeholder": {
+    "api": "API integration comes next — see project-context.md and api_reference."
+  },
+  "resourceSelect": {
+    "loading": "Loading providers…",
+    "missingSlug": "Set EXPO_PUBLIC_TENANT_SLUG in your environment (see .env.example).",
+    "tenantNotFound": "Salon not found. Check the tenant slug and try again.",
+    "networkError": "Something went wrong. Check your connection and try again.",
+    "resourcesError": "Could not load providers. Please try again.",
+    "emptyList": "No providers are available right now.",
+    "retry": "Try again",
+    "chooseProviderA11y": "Choose provider {{name}}"
+  }
+}
