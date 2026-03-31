@@ -9,7 +9,7 @@ import { PrimaryButton } from '../components/PrimaryButton';
 import { ScreenScroll } from '../components/ScreenScroll';
 import { fetchResources, fetchTenantBySlug } from '../store/bookingThunks';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { setResourceId } from '../store/slices/bookingSlice';
+import { pickResource } from '../store/slices/bookingSlice';
 import type { Resource } from '../api/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ResourceSelect'>;
@@ -52,7 +52,7 @@ export function ResourceSelectScreen({ navigation }: Props) {
 
   const onSelectResource = useCallback(
     (id: string) => {
-      dispatch(setResourceId(id));
+      dispatch(pickResource(id));
       navigation.navigate('ServiceSelect');
     },
     [dispatch, navigation],

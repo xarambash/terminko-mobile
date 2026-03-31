@@ -32,5 +32,45 @@
     "emptyList": "No providers are available right now.",
     "retry": "Try again",
     "chooseProviderA11y": "Choose provider {{name}}"
+  },
+  "serviceSelect": {
+    "loading": "Loading services…",
+    "error": "Could not load services. Please try again.",
+    "emptyList": "No services available for this provider.",
+    "retry": "Try again",
+    "min": "{{count}} min",
+    "chooseServiceA11y": "Choose service {{name}}"
+  },
+  "slotSelect": {
+    "pickDate": "Select a date",
+    "loadingSlots": "Loading available slots…",
+    "slotsError": "Could not load slots. Please try again.",
+    "noSlots": "No slots available for this day.",
+    "retry": "Try again",
+    "chooseSlotA11y": "Choose slot {{time}}"
+  },
+  "bookingForm": {
+    "name": "Full name",
+    "namePlaceholder": "e.g. Jane Doe",
+    "email": "Email",
+    "emailPlaceholder": "you@example.com",
+    "phone": "Phone",
+    "phonePlaceholder": "+1 555 000 0000",
+    "notes": "Notes (optional)",
+    "notesPlaceholder": "Any requests or notes…",
+    "submit": "Confirm booking",
+    "submitting": "Booking…",
+    "validationName": "Please enter your full name.",
+    "validationEmail": "Please enter a valid email address.",
+    "validationPhone": "Please enter your phone number.",
+    "errorTitle": "Booking failed",
+    "errorNetwork": "Something went wrong. Please try again."
+  },
+  "confirmation": {
+    "title": "You're booked!",
+    "provider": "Provider",
+    "service": "Service",
+    "dateTime": "Date & time",
+    "backHome": "Back to home"
   }
 }
