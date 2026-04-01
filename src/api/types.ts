@@ -75,3 +75,10 @@ export type AppointmentCreated = {
     email: string;
   };
 };
+
+/** Response from PATCH /tenants/:tenantId/appointments/:id */
+export type AppointmentCanceled = {
+  id: string;
+  status: string;
+  canceledAt: string;
+};

@@ -6,9 +6,9 @@ Guest-facing mobile app for Terminko (Expo, React Native, TypeScript). Owners an
 
 | File | Purpose |
 |------|---------|
-| [`project-context.md`](./project-context.md) | Scope, flows, API notes |
-| [`tech-stack.md`](./tech-stack.md) | Dependencies and tooling |
-| [`ai-docs/guides/production-mobile-api-setup.md`](./ai-docs/guides/production-mobile-api-setup.md) | Production API/mobile networking setup |
+| [`agent-rules/context/project-context.md`](./agent-rules/context/project-context.md) | Scope, flows, API notes |
+| [`agent-rules/context/tech-stack.md`](./agent-rules/context/tech-stack.md) | Dependencies and tooling |
+| [`../src/reminders/production-mobile-api-setup.md`](../src/reminders/production-mobile-api-setup.md) | Production API/mobile networking setup (monorepo) |
 
 ## Requirements
 

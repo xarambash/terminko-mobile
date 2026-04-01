@@ -5,7 +5,5 @@ export type RootStackParamList = {
   SlotSelect: undefined;
   BookingForm: undefined;
   Confirmation: undefined;
-  Reservations: undefined;
   CancelAppointment: undefined;
-  AboutUs: undefined;
 };

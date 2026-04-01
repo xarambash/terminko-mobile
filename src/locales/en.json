@@ -4,9 +4,7 @@
     "title": "Book your visit",
     "subtitle": "Choose an option to continue",
     "book": "Schedule appointment",
-    "reservations": "My appointments",
-    "cancel": "Cancel appointment",
-    "about": "About us"
+    "cancel": "Cancel appointment"
   },
   "screens": {
     "resourceSelect": "Choose a provider",
@@ -14,9 +12,7 @@
     "slotSelect": "Pick date & time",
     "bookingForm": "Your details",
     "confirmation": "Booking confirmed",
-    "reservations": "Your appointments",
     "cancelAppointment": "Cancel with code",
-    "aboutUs": "About the salon",
     "next": "Next",
     "back": "Back"
   },
@@ -72,5 +68,18 @@
     "service": "Service",
     "dateTime": "Date & time",
     "backHome": "Back to home"
+  },
+  "cancelAppointment": {
+    "title": "Cancel appointment",
+    "hint": "Enter the cancellation code from your confirmation email.",
+    "code": "Cancellation code",
+    "codePlaceholder": "Enter code",
+    "submit": "Cancel reservation",
+    "submitting": "Canceling...",
+    "close": "Close",
+    "success": "Appointment canceled successfully.",
+    "error": "Unable to cancel appointment. Check the cancellation code.",
+    "validationRequired": "Cancellation code is required.",
+    "missingSlug": "Set EXPO_PUBLIC_TENANT_SLUG before using cancellation."
   }
 }
