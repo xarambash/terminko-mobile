@@ -5,6 +5,7 @@
     "subtitle": "Choose an option to continue",
     "book": "Schedule appointment",
     "reservations": "My appointments",
+    "cancel": "Cancel appointment",
     "about": "About us"
   },
   "screens": {
@@ -14,6 +15,7 @@
     "bookingForm": "Your details",
     "confirmation": "Booking confirmed",
     "reservations": "Your appointments",
+    "cancelAppointment": "Cancel with code",
     "aboutUs": "About the salon",
     "next": "Next",
     "back": "Back"
@@ -70,25 +72,5 @@
     "service": "Service",
     "dateTime": "Date & time",
     "backHome": "Back to home"
-  },
-  "reservations": {
-    "loading": "Loading your appointments...",
-    "missingInstallationId": "No saved installation profile found on this device.",
-    "installationIdHint": "App installation ID not found (current: {{installationId}}).",
-    "missingTenantSlug": "Set EXPO_PUBLIC_TENANT_SLUG in your environment.",
-    "tenantNotFound": "Salon not found. Check tenant slug and try again.",
-    "networkError": "Could not load your appointments. Please try again.",
-    "retry": "Try again",
-    "emptyList": "You do not have any appointments yet.",
-    "emptyUpcoming": "No upcoming scheduled appointments.",
-    "unknownProvider": "Unknown provider",
-    "unknownService": "Unknown service",
-    "cancelAction": "Cancel appointment",
-    "canceling": "Canceling...",
-    "cancelConfirmTitle": "Cancel appointment?",
-    "cancelConfirmMessage": "You are canceling {{service}} with {{provider}} on {{when}}.",
-    "cancelKeep": "Keep appointment",
-    "cancelFailedTitle": "Cancellation failed",
-    "cancelFailedMessage": "We could not cancel this appointment. Please try again."
   }
 }
