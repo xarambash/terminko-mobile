@@ -11,6 +11,7 @@ import { fetchResources, fetchTenantBySlug } from '../store/bookingThunks';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { pickResource } from '../store/slices/bookingSlice';
 import type { Resource } from '../api/types';
+import { useAppTheme } from '../theme/ThemeProvider';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ResourceSelect'>;
 
@@ -20,6 +21,7 @@ function resourceLabel(r: Resource): string {
 
 export function ResourceSelectScreen({ navigation }: Props) {
   const { t } = useTranslation();
+  const { theme } = useAppTheme();
   const dispatch = useAppDispatch();
   const {
     tenantId,
@@ -69,22 +71,22 @@ export function ResourceSelectScreen({ navigation }: Props) {
 
   return (
     <ScreenScroll>
-      <Text style={styles.title}>{t('screens.resourceSelect')}</Text>
-
       {missingSlug && (
-        <Text style={styles.errorText}>{t('resourceSelect.missingSlug')}</Text>
+        <Text style={[styles.errorText, { color: theme.colors.error }]}>
+          {t('resourceSelect.missingSlug')}
+        </Text>
       )}
 
       {!missingSlug && loading && (
         <View style={styles.centered}>
           <ActivityIndicator size="large" />
-          <Text style={styles.hint}>{t('resourceSelect.loading')}</Text>
+          <Text style={[styles.hint, { color: theme.colors.textSecondary }]}>{t('resourceSelect.loading')}</Text>
         </View>
       )}
 
       {!missingSlug && tenantFailed && (
         <View style={styles.block}>
-          <Text style={styles.errorText}>
+          <Text style={[styles.errorText, { color: theme.colors.error }]}>
             {tenantErrorCode === 'tenantNotFound'
               ? t('resourceSelect.tenantNotFound')
               : t('resourceSelect.networkError')}
@@ -95,13 +97,17 @@ export function ResourceSelectScreen({ navigation }: Props) {
 
       {!missingSlug && tenantStatus === 'succeeded' && resourcesFailed && (
         <View style={styles.block}>
-          <Text style={styles.errorText}>{t('resourceSelect.resourcesError')}</Text>
+          <Text style={[styles.errorText, { color: theme.colors.error }]}>
+            {t('resourceSelect.resourcesError')}
+          </Text>
           <PrimaryButton onPress={onRetryResources}>{t('resourceSelect.retry')}</PrimaryButton>
         </View>
       )}
 
       {showList && resources.length === 0 && (
-        <Text style={styles.hint}>{t('resourceSelect.emptyList')}</Text>
+        <Text style={[styles.hint, { color: theme.colors.textSecondary }]}>
+          {t('resourceSelect.emptyList')}
+        </Text>
       )}
 
       {showList &&
@@ -114,30 +120,32 @@ export function ResourceSelectScreen({ navigation }: Props) {
               name: resourceLabel(item),
             })}
             onPress={() => onSelectResource(item.id)}
-            style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+            style={({ pressed }) => [
+              styles.row,
+              { backgroundColor: theme.colors.surfaceMuted },
+              pressed && styles.rowPressed,
+            ]}
           >
-            <Text style={styles.rowText}>{resourceLabel(item)}</Text>
+            <Text style={[styles.rowText, { color: theme.colors.textPrimary }]}>
+              {resourceLabel(item)}
+            </Text>
           </Pressable>
         ))}
-
-      <PrimaryButton onPress={() => navigation.goBack()}>{t('screens.back')}</PrimaryButton>
     </ScreenScroll>
   );
 }
 
 const styles = StyleSheet.create({
-  title: { fontSize: 22, fontWeight: '600', marginBottom: 12 },
-  hint: { color: '#666', marginTop: 12, fontSize: 15 },
-  errorText: { color: '#b00020', marginBottom: 12, fontSize: 15 },
+  hint: { marginTop: 12, fontSize: 15 },
+  errorText: { marginBottom: 12, fontSize: 15 },
   centered: { alignItems: 'center', paddingVertical: 24 },
   block: { marginBottom: 8 },
   row: {
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderRadius: 10,
-    backgroundColor: '#f2f2f2',
     marginBottom: 8,
   },
   rowPressed: { opacity: 0.85 },
-  rowText: { fontSize: 16, fontWeight: '500', color: '#111' },
+  rowText: { fontSize: 16, fontWeight: '500' },
 });

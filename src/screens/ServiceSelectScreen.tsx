@@ -10,6 +10,7 @@ import { fetchServices } from '../store/bookingThunks';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { pickService } from '../store/slices/bookingSlice';
 import type { ResourceService } from '../api/types';
+import { useAppTheme } from '../theme/ThemeProvider';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ServiceSelect'>;
 
@@ -19,6 +20,7 @@ function effectiveDuration(s: ResourceService): number {
 
 export function ServiceSelectScreen({ navigation }: Props) {
   const { t } = useTranslation();
+  const { theme } = useAppTheme();
   const dispatch = useAppDispatch();
   const { tenantId, resourceId, services, servicesStatus, servicesError } = useAppSelector(
     (s) => s.booking,
@@ -48,24 +50,24 @@ export function ServiceSelectScreen({ navigation }: Props) {
 
   return (
     <ScreenScroll>
-      <Text style={styles.title}>{t('screens.serviceSelect')}</Text>
-
       {loading && (
         <View style={styles.centered}>
           <ActivityIndicator size="large" />
-          <Text style={styles.hint}>{t('serviceSelect.loading')}</Text>
+          <Text style={[styles.hint, { color: theme.colors.textSecondary }]}>{t('serviceSelect.loading')}</Text>
         </View>
       )}
 
       {failed && (
         <View style={styles.block}>
-          <Text style={styles.errorText}>{t('serviceSelect.error')}</Text>
+          <Text style={[styles.errorText, { color: theme.colors.error }]}>{t('serviceSelect.error')}</Text>
           <PrimaryButton onPress={onRetry}>{t('serviceSelect.retry')}</PrimaryButton>
         </View>
       )}
 
       {showList && services.length === 0 && (
-        <Text style={styles.hint}>{t('serviceSelect.emptyList')}</Text>
+        <Text style={[styles.hint, { color: theme.colors.textSecondary }]}>
+          {t('serviceSelect.emptyList')}
+        </Text>
       )}
 
       {showList &&
@@ -78,46 +80,50 @@ export function ServiceSelectScreen({ navigation }: Props) {
               name: item.service.name,
             })}
             onPress={() => onSelectService(item.serviceId)}
-            style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+            style={({ pressed }) => [
+              styles.row,
+              { backgroundColor: theme.colors.surfaceMuted },
+              pressed && styles.rowPressed,
+            ]}
           >
             <View style={styles.rowContent}>
-              <Text style={styles.rowName}>{item.service.name}</Text>
+              <Text style={[styles.rowName, { color: theme.colors.textPrimary }]}>
+                {item.service.name}
+              </Text>
               <View style={styles.rowMeta}>
-                <Text style={styles.rowPrice}>{item.price}</Text>
-                <Text style={styles.rowDuration}>
+                <Text style={[styles.rowPrice, { color: theme.colors.textPrimary }]}>{item.price}</Text>
+                <Text style={[styles.rowDuration, { color: theme.colors.textSecondary }]}>
                   {t('serviceSelect.min', { count: effectiveDuration(item) })}
                 </Text>
               </View>
             </View>
             {item.service.description ? (
-              <Text style={styles.rowDesc}>{item.service.description}</Text>
+              <Text style={[styles.rowDesc, { color: theme.colors.textSecondary }]}>
+                {item.service.description}
+              </Text>
             ) : null}
           </Pressable>
         ))}
-
-      <PrimaryButton onPress={() => navigation.goBack()}>{t('screens.back')}</PrimaryButton>
     </ScreenScroll>
   );
 }
 
 const styles = StyleSheet.create({
-  title: { fontSize: 22, fontWeight: '600', marginBottom: 12 },
-  hint: { color: '#666', marginTop: 12, fontSize: 15 },
-  errorText: { color: '#b00020', marginBottom: 12, fontSize: 15 },
+  hint: { marginTop: 12, fontSize: 15 },
+  errorText: { marginBottom: 12, fontSize: 15 },
   centered: { alignItems: 'center', paddingVertical: 24 },
   block: { marginBottom: 8 },
   row: {
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderRadius: 10,
-    backgroundColor: '#f2f2f2',
     marginBottom: 8,
   },
   rowPressed: { opacity: 0.85 },
   rowContent: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  rowName: { fontSize: 16, fontWeight: '500', color: '#111', flex: 1, marginRight: 8 },
+  rowName: { fontSize: 16, fontWeight: '500', flex: 1, marginRight: 8 },
   rowMeta: { alignItems: 'flex-end' },
-  rowPrice: { fontSize: 15, fontWeight: '600', color: '#111' },
-  rowDuration: { fontSize: 13, color: '#555', marginTop: 2 },
-  rowDesc: { fontSize: 13, color: '#666', marginTop: 6 },
+  rowPrice: { fontSize: 15, fontWeight: '600' },
+  rowDuration: { fontSize: 13, marginTop: 2 },
+  rowDesc: { fontSize: 13, marginTop: 6 },
 });

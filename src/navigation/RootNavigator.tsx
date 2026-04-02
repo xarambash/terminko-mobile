@@ -8,35 +8,44 @@ import { LandingScreen } from '../screens/LandingScreen';
 import { ResourceSelectScreen } from '../screens/ResourceSelectScreen';
 import { ServiceSelectScreen } from '../screens/ServiceSelectScreen';
 import { SlotSelectScreen } from '../screens/SlotSelectScreen';
+import { useAppTheme } from '../theme/ThemeProvider';
 import type { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function RootNavigator() {
+  const { theme } = useAppTheme();
+
   return (
     <NavigationContainer>
       <Stack.Navigator
         initialRouteName="Landing"
         screenOptions={{
           headerShadowVisible: false,
+          headerStyle: { backgroundColor: theme.colors.background },
+          headerTintColor: theme.colors.textPrimary,
+          headerTitleStyle: { color: theme.colors.textPrimary },
+          contentStyle: { backgroundColor: theme.colors.background },
+          animation: 'fade',
+          gestureEnabled: false,
         }}
-      >
-        <Stack.Screen name="Landing" component={LandingScreen} options={{ title: 'Terminko' }} />
+      > 
+        <Stack.Screen name="Landing" component={LandingScreen} options={{ title: '' }} />
         <Stack.Screen
           name="ResourceSelect"
           component={ResourceSelectScreen}
-          options={{ title: 'Resource' }}
+          options={{ title: '' }}
         />
         <Stack.Screen
           name="ServiceSelect"
           component={ServiceSelectScreen}
-          options={{ title: 'Service' }}
+          options={{ title: '' }}
         />
-        <Stack.Screen name="SlotSelect" component={SlotSelectScreen} options={{ title: 'Time' }} />
+        <Stack.Screen name="SlotSelect" component={SlotSelectScreen} options={{ title: '' }} />
         <Stack.Screen
           name="BookingForm"
           component={BookingFormScreen}
-          options={{ title: 'Details' }}
+          options={{ title: '' }}
         />
         <Stack.Screen
           name="Confirmation"

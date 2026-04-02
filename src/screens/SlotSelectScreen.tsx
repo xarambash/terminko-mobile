@@ -11,6 +11,7 @@ import { ScreenScroll } from '../components/ScreenScroll';
 import { fetchSlots } from '../store/bookingThunks';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setSelectedDate, setSelectedSlot } from '../store/slices/bookingSlice';
+import { useAppTheme } from '../theme/ThemeProvider';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SlotSelect'>;
 
@@ -20,6 +21,7 @@ function formatSlotTime(iso: string): string {
 
 export function SlotSelectScreen({ navigation }: Props) {
   const { t } = useTranslation();
+  const { theme } = useAppTheme();
   const dispatch = useAppDispatch();
   const { tenantId, resourceId, serviceId, selectedDate, slots, slotsStatus, slotsError } =
     useAppSelector((s) => s.booking);
@@ -51,7 +53,7 @@ export function SlotSelectScreen({ navigation }: Props) {
 
   const today = format(new Date(), 'yyyy-MM-dd');
   const markedDates = selectedDate
-    ? { [selectedDate]: { selected: true, selectedColor: '#2563eb' } }
+    ? { [selectedDate]: { selected: true, selectedColor: theme.colors.primary } }
     : {};
 
   const slotsLoading = slotsStatus === 'loading';
@@ -60,70 +62,84 @@ export function SlotSelectScreen({ navigation }: Props) {
 
   return (
     <ScreenScroll>
-      <Text style={styles.title}>{t('screens.slotSelect')}</Text>
-
       <Calendar
         onDayPress={onDayPress}
         markedDates={markedDates}
         minDate={today}
         theme={{
-          selectedDayBackgroundColor: '#2563eb',
-          todayTextColor: '#2563eb',
-          arrowColor: '#2563eb',
+          backgroundColor: theme.colors.surface,
+          calendarBackground: theme.colors.surface,
+          selectedDayBackgroundColor: theme.colors.primary,
+          selectedDayTextColor: theme.colors.onPrimary,
+          dayTextColor: theme.colors.textPrimary,
+          monthTextColor: theme.colors.textPrimary,
+          todayTextColor: theme.colors.primary,
+          arrowColor: theme.colors.primary,
+          textDisabledColor: theme.colors.textSecondary,
         }}
       />
 
       {!selectedDate && (
-        <Text style={[styles.hint, styles.pickHint]}>{t('slotSelect.pickDate')}</Text>
+        <Text style={[styles.hint, { color: theme.colors.textSecondary }, styles.pickHint]}>
+          {t('slotSelect.pickDate')}
+        </Text>
       )}
 
       {selectedDate && slotsLoading && (
         <View style={styles.centered}>
           <ActivityIndicator size="small" />
-          <Text style={styles.hint}>{t('slotSelect.loadingSlots')}</Text>
+          <Text style={[styles.hint, { color: theme.colors.textSecondary }]}>
+            {t('slotSelect.loadingSlots')}
+          </Text>
         </View>
       )}
 
       {selectedDate && slotsFailed && (
         <View style={styles.block}>
-          <Text style={styles.errorText}>{t('slotSelect.slotsError')}</Text>
+          <Text style={[styles.errorText, { color: theme.colors.error }]}>
+            {t('slotSelect.slotsError')}
+          </Text>
           <PrimaryButton onPress={onRetry}>{t('slotSelect.retry')}</PrimaryButton>
         </View>
       )}
 
       {selectedDate && showSlots && slots.length === 0 && (
-        <Text style={styles.hint}>{t('slotSelect.noSlots')}</Text>
+        <Text style={[styles.hint, { color: theme.colors.textSecondary }]}>{t('slotSelect.noSlots')}</Text>
       )}
 
       {selectedDate && showSlots && slots.length > 0 && (
         <View style={styles.slotsGrid}>
-          {slots.map((slot) => {
+          {slots.map((slot, index) => {
             const label = `${formatSlotTime(slot.startAt)} – ${formatSlotTime(slot.endAt)}`;
             return (
               <Pressable
-                key={slot.startAt}
+                key={`${slot.startAt}-${slot.endAt}-${index}`}
                 accessibilityRole="button"
                 accessibilityLabel={t('slotSelect.chooseSlotA11y', { time: label })}
                 onPress={() => onPickSlot(slot.startAt, slot.endAt)}
-                style={({ pressed }) => [styles.slotChip, pressed && styles.slotChipPressed]}
+                style={({ pressed }) => [
+                  styles.slotChip,
+                  {
+                    backgroundColor: theme.colors.secondary,
+                    borderColor: theme.colors.primary,
+                  },
+                  pressed && styles.slotChipPressed,
+                ]}
               >
-                <Text style={styles.slotText}>{label}</Text>
+                <Text style={[styles.slotText, { color: theme.colors.textPrimary }]}>{label}</Text>
               </Pressable>
             );
           })}
         </View>
       )}
-
-      <PrimaryButton onPress={() => navigation.goBack()}>{t('screens.back')}</PrimaryButton>
     </ScreenScroll>
   );
 }
 
 const styles = StyleSheet.create({
-  title: { fontSize: 22, fontWeight: '600', marginBottom: 12 },
-  hint: { color: '#666', marginTop: 12, fontSize: 15 },
+  hint: { marginTop: 12, fontSize: 15 },
   pickHint: { textAlign: 'center', marginVertical: 16 },
-  errorText: { color: '#b00020', marginBottom: 12, fontSize: 15 },
+  errorText: { marginBottom: 12, fontSize: 15 },
   centered: { alignItems: 'center', paddingVertical: 16 },
   block: { marginTop: 12, marginBottom: 8 },
   slotsGrid: {
@@ -137,8 +153,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 14,
     borderRadius: 8,
-    backgroundColor: '#dbeafe',
+    borderWidth: 1,
   },
   slotChipPressed: { opacity: 0.75 },
-  slotText: { fontSize: 14, fontWeight: '500', color: '#1d4ed8' },
+  slotText: { fontSize: 14, fontWeight: '500' },
 });

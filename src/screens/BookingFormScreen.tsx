@@ -17,6 +17,7 @@ import { ScreenScroll } from '../components/ScreenScroll';
 import { submitBooking } from '../store/bookingThunks';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { resetSubmit } from '../store/slices/bookingSlice';
+import { useAppTheme } from '../theme/ThemeProvider';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'BookingForm'>;
 
@@ -24,6 +25,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function BookingFormScreen({ navigation }: Props) {
   const { t } = useTranslation();
+  const { theme } = useAppTheme();
   const dispatch = useAppDispatch();
 
   const { tenantId, resourceId, serviceId, slotStart, slotEnd, resources, services, submitStatus, submitError } =
@@ -112,24 +114,40 @@ export function BookingFormScreen({ navigation }: Props) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScreenScroll>
-        <Text style={styles.title}>{t('screens.bookingForm')}</Text>
-
-        <Text style={styles.label}>{t('bookingForm.name')}</Text>
+        <Text style={[styles.label, { color: theme.colors.textPrimary }]}>{t('bookingForm.name')}</Text>
         <TextInput
-          style={[styles.input, fieldErrors.name ? styles.inputError : null]}
+          style={[
+            styles.input,
+            {
+              borderColor: fieldErrors.name ? theme.colors.error : theme.colors.border,
+              backgroundColor: theme.colors.surface,
+              color: theme.colors.textPrimary,
+            },
+          ]}
           placeholder={t('bookingForm.namePlaceholder')}
+          placeholderTextColor={theme.colors.textSecondary}
           value={name}
           onChangeText={setName}
           autoCapitalize="words"
           autoComplete="name"
           returnKeyType="next"
         />
-        {fieldErrors.name ? <Text style={styles.fieldError}>{fieldErrors.name}</Text> : null}
+        {fieldErrors.name ? (
+          <Text style={[styles.fieldError, { color: theme.colors.error }]}>{fieldErrors.name}</Text>
+        ) : null}
 
-        <Text style={styles.label}>{t('bookingForm.email')}</Text>
+        <Text style={[styles.label, { color: theme.colors.textPrimary }]}>{t('bookingForm.email')}</Text>
         <TextInput
-          style={[styles.input, fieldErrors.email ? styles.inputError : null]}
+          style={[
+            styles.input,
+            {
+              borderColor: fieldErrors.email ? theme.colors.error : theme.colors.border,
+              backgroundColor: theme.colors.surface,
+              color: theme.colors.textPrimary,
+            },
+          ]}
           placeholder={t('bookingForm.emailPlaceholder')}
+          placeholderTextColor={theme.colors.textSecondary}
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
@@ -137,24 +155,45 @@ export function BookingFormScreen({ navigation }: Props) {
           autoComplete="email"
           returnKeyType="next"
         />
-        {fieldErrors.email ? <Text style={styles.fieldError}>{fieldErrors.email}</Text> : null}
+        {fieldErrors.email ? (
+          <Text style={[styles.fieldError, { color: theme.colors.error }]}>{fieldErrors.email}</Text>
+        ) : null}
 
-        <Text style={styles.label}>{t('bookingForm.phone')}</Text>
+        <Text style={[styles.label, { color: theme.colors.textPrimary }]}>{t('bookingForm.phone')}</Text>
         <TextInput
-          style={[styles.input, fieldErrors.phone ? styles.inputError : null]}
+          style={[
+            styles.input,
+            {
+              borderColor: fieldErrors.phone ? theme.colors.error : theme.colors.border,
+              backgroundColor: theme.colors.surface,
+              color: theme.colors.textPrimary,
+            },
+          ]}
           placeholder={t('bookingForm.phonePlaceholder')}
+          placeholderTextColor={theme.colors.textSecondary}
           value={phone}
           onChangeText={setPhone}
           keyboardType="phone-pad"
           autoComplete="tel"
           returnKeyType="next"
         />
-        {fieldErrors.phone ? <Text style={styles.fieldError}>{fieldErrors.phone}</Text> : null}
+        {fieldErrors.phone ? (
+          <Text style={[styles.fieldError, { color: theme.colors.error }]}>{fieldErrors.phone}</Text>
+        ) : null}
 
-        <Text style={styles.label}>{t('bookingForm.notes')}</Text>
+        <Text style={[styles.label, { color: theme.colors.textPrimary }]}>{t('bookingForm.notes')}</Text>
         <TextInput
-          style={[styles.input, styles.notesInput]}
+          style={[
+            styles.input,
+            styles.notesInput,
+            {
+              borderColor: theme.colors.border,
+              backgroundColor: theme.colors.surface,
+              color: theme.colors.textPrimary,
+            },
+          ]}
           placeholder={t('bookingForm.notesPlaceholder')}
+          placeholderTextColor={theme.colors.textSecondary}
           value={notes}
           onChangeText={setNotes}
           multiline
@@ -163,9 +202,14 @@ export function BookingFormScreen({ navigation }: Props) {
         />
 
         {submitStatus === 'failed' && submitError && (
-          <View style={styles.errorBox}>
-            <Text style={styles.errorTitle}>{t('bookingForm.errorTitle')}</Text>
-            <Text style={styles.errorText}>
+          <View
+            style={[
+              styles.errorBox,
+              { backgroundColor: theme.colors.surfaceMuted, borderColor: theme.colors.error },
+            ]}
+          >
+            <Text style={[styles.errorTitle, { color: theme.colors.error }]}>{t('bookingForm.errorTitle')}</Text>
+            <Text style={[styles.errorText, { color: theme.colors.error }]}>
               {submitError === 'network' ? t('bookingForm.errorNetwork') : submitError}
             </Text>
           </View>
@@ -174,13 +218,13 @@ export function BookingFormScreen({ navigation }: Props) {
         {submitting ? (
           <View style={styles.loadingRow}>
             <ActivityIndicator size="small" />
-            <Text style={styles.loadingText}>{t('bookingForm.submitting')}</Text>
+            <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
+              {t('bookingForm.submitting')}
+            </Text>
           </View>
         ) : (
           <PrimaryButton onPress={onSubmit}>{t('bookingForm.submit')}</PrimaryButton>
         )}
-
-        <PrimaryButton onPress={() => navigation.goBack()}>{t('screens.back')}</PrimaryButton>
       </ScreenScroll>
     </KeyboardAvoidingView>
   );
@@ -188,31 +232,24 @@ export function BookingFormScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  title: { fontSize: 22, fontWeight: '600', marginBottom: 16 },
-  label: { fontSize: 14, fontWeight: '500', color: '#333', marginBottom: 4, marginTop: 12 },
+  label: { fontSize: 14, fontWeight: '500', marginBottom: 4, marginTop: 12 },
   input: {
     borderWidth: 1,
-    borderColor: '#d1d5db',
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 16,
-    backgroundColor: '#fff',
-    color: '#111',
   },
-  inputError: { borderColor: '#b00020' },
   notesInput: { height: 80, textAlignVertical: 'top' },
-  fieldError: { color: '#b00020', fontSize: 13, marginTop: 4 },
+  fieldError: { fontSize: 13, marginTop: 4 },
   errorBox: {
-    backgroundColor: '#fef2f2',
     borderRadius: 8,
     padding: 12,
     marginVertical: 12,
     borderWidth: 1,
-    borderColor: '#fecaca',
   },
-  errorTitle: { fontWeight: '600', color: '#b00020', marginBottom: 4 },
-  errorText: { color: '#b00020', fontSize: 14 },
+  errorTitle: { fontWeight: '600', marginBottom: 4 },
+  errorText: { fontSize: 14 },
   loadingRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, gap: 8 },
-  loadingText: { color: '#555', fontSize: 15 },
+  loadingText: { fontSize: 15 },
 });
