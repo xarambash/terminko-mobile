@@ -23,10 +23,10 @@ export function RootNavigator() {
         screenOptions={{
           headerShadowVisible: false,
           headerStyle: { backgroundColor: theme.colors.background },
-          headerTintColor: theme.colors.textPrimary,
-          headerTitleStyle: { color: theme.colors.textPrimary },
+          headerTintColor: theme.colors.text,
+          headerTitleStyle: { color: theme.colors.text },
           contentStyle: { backgroundColor: theme.colors.background },
-          animation: 'fade',
+          animation: 'none',
           gestureEnabled: false,
         }}
       > 
@@ -55,7 +55,11 @@ export function RootNavigator() {
         <Stack.Screen
           name="CancelAppointment"
           component={CancelAppointmentScreen}
-          options={{ title: 'Cancel' }}
+          options={{
+            title: '',
+            headerBackButtonDisplayMode: 'minimal',
+            headerBackTitle: '',
+          }}
         />
       </Stack.Navigator>
     </NavigationContainer>

@@ -16,11 +16,11 @@ export function PrimaryButton({ children, onPress }: Props) {
       onPress={onPress}
       style={({ pressed }) => [
         styles.btn,
-        { backgroundColor: theme.colors.primary },
+        { backgroundColor: theme.colors.contrast },
         pressed && styles.pressed,
       ]}
     >
-      <Text style={[styles.label, { color: theme.colors.onPrimary }]}>{children}</Text>
+      <Text style={[styles.label, { color: theme.colors.text }]}>{children}</Text>
     </Pressable>
   );
 }

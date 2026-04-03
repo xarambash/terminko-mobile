@@ -1,6 +1,6 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useCallback, useEffect } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { TENANT_SLUG } from '../constants/env';
@@ -10,13 +10,46 @@ import { ScreenScroll } from '../components/ScreenScroll';
 import { fetchResources, fetchTenantBySlug } from '../store/bookingThunks';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { pickResource } from '../store/slices/bookingSlice';
-import type { Resource } from '../api/types';
+import { bookingSummaryStyles } from '../styles/bookingSummaryStyles';
 import { useAppTheme } from '../theme/ThemeProvider';
+import { formatResourceName } from '../utils/formatResourceName';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ResourceSelect'>;
 
-function resourceLabel(r: Resource): string {
-  return `${r.firstName} ${r.lastName}`.trim();
+function ResourceAvatar({
+  uri,
+  fallbackLabel,
+}: {
+  uri: string | null;
+  fallbackLabel: string;
+}) {
+  const { theme } = useAppTheme();
+  const [failed, setFailed] = useState(false);
+  const showImage = Boolean(uri?.trim()) && !failed;
+  const initial = fallbackLabel.trim().charAt(0).toUpperCase() || '?';
+
+  return (
+    <View
+      style={[
+        styles.avatarOuter,
+        {
+          backgroundColor: theme.colors.contrast,
+          borderColor: theme.colors.background,
+        },
+      ]}
+    >
+      {showImage ? (
+        <Image
+          source={{ uri: uri!.trim() }}
+          style={styles.avatarImage}
+          resizeMode="cover"
+          onError={() => setFailed(true)}
+        />
+      ) : (
+        <Text style={[styles.avatarInitial, { color: theme.colors.text }]}>{initial}</Text>
+      )}
+    </View>
+  );
 }
 
 export function ResourceSelectScreen({ navigation }: Props) {
@@ -71,8 +104,14 @@ export function ResourceSelectScreen({ navigation }: Props) {
 
   return (
     <ScreenScroll>
+      {!missingSlug && (
+        <Text style={[bookingSummaryStyles.pageHeading, { color: theme.colors.contrast }]}>
+          {t('resourceSelect.title')}
+        </Text>
+      )}
+
       {missingSlug && (
-        <Text style={[styles.errorText, { color: theme.colors.error }]}>
+        <Text style={[styles.errorText, { color: theme.colors.text }]}>
           {t('resourceSelect.missingSlug')}
         </Text>
       )}
@@ -80,13 +119,13 @@ export function ResourceSelectScreen({ navigation }: Props) {
       {!missingSlug && loading && (
         <View style={styles.centered}>
           <ActivityIndicator size="large" />
-          <Text style={[styles.hint, { color: theme.colors.textSecondary }]}>{t('resourceSelect.loading')}</Text>
+          <Text style={[styles.hint, { color: theme.colors.text }]}>{t('resourceSelect.loading')}</Text>
         </View>
       )}
 
       {!missingSlug && tenantFailed && (
         <View style={styles.block}>
-          <Text style={[styles.errorText, { color: theme.colors.error }]}>
+          <Text style={[styles.errorText, { color: theme.colors.text }]}>
             {tenantErrorCode === 'tenantNotFound'
               ? t('resourceSelect.tenantNotFound')
               : t('resourceSelect.networkError')}
@@ -97,7 +136,7 @@ export function ResourceSelectScreen({ navigation }: Props) {
 
       {!missingSlug && tenantStatus === 'succeeded' && resourcesFailed && (
         <View style={styles.block}>
-          <Text style={[styles.errorText, { color: theme.colors.error }]}>
+          <Text style={[styles.errorText, { color: theme.colors.text }]}>
             {t('resourceSelect.resourcesError')}
           </Text>
           <PrimaryButton onPress={onRetryResources}>{t('resourceSelect.retry')}</PrimaryButton>
@@ -105,7 +144,7 @@ export function ResourceSelectScreen({ navigation }: Props) {
       )}
 
       {showList && resources.length === 0 && (
-        <Text style={[styles.hint, { color: theme.colors.textSecondary }]}>
+        <Text style={[styles.hint, { color: theme.colors.text }]}>
           {t('resourceSelect.emptyList')}
         </Text>
       )}
@@ -117,17 +156,22 @@ export function ResourceSelectScreen({ navigation }: Props) {
             key={item.id}
             accessibilityRole="button"
             accessibilityLabel={t('resourceSelect.chooseProviderA11y', {
-              name: resourceLabel(item),
+              name: formatResourceName(item),
             })}
             onPress={() => onSelectResource(item.id)}
             style={({ pressed }) => [
               styles.row,
-              { backgroundColor: theme.colors.surfaceMuted },
+              { backgroundColor: theme.colors.contrast },
               pressed && styles.rowPressed,
             ]}
           >
-            <Text style={[styles.rowText, { color: theme.colors.textPrimary }]}>
-              {resourceLabel(item)}
+            <ResourceAvatar
+              key={`${item.id}-${item.profilePicture ?? ''}`}
+              uri={item.profilePicture}
+              fallbackLabel={formatResourceName(item)}
+            />
+            <Text style={[styles.rowText, { color: theme.colors.text }]}>
+              {formatResourceName(item)}
             </Text>
           </Pressable>
         ))}
@@ -141,11 +185,24 @@ const styles = StyleSheet.create({
   centered: { alignItems: 'center', paddingVertical: 24 },
   block: { marginBottom: 8 },
   row: {
-    paddingVertical: 14,
+    alignItems: 'center',
+    paddingVertical: 16,
     paddingHorizontal: 16,
     borderRadius: 10,
     marginBottom: 8,
   },
   rowPressed: { opacity: 0.85 },
-  rowText: { fontSize: 16, fontWeight: '500' },
+  rowText: { fontSize: 16, fontWeight: '500', textAlign: 'center' },
+  avatarOuter: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    borderWidth: 1,
+    marginBottom: 10,
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarImage: { width: '100%', height: '100%' },
+  avatarInitial: { fontSize: 32, fontWeight: '600' },
 });

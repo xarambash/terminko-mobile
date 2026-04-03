@@ -1,6 +1,6 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useCallback, useEffect } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useMemo } from 'react';
+import { ActivityIndicator, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
 import { Calendar } from 'react-native-calendars';
@@ -11,7 +11,9 @@ import { ScreenScroll } from '../components/ScreenScroll';
 import { fetchSlots } from '../store/bookingThunks';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setSelectedDate, setSelectedSlot } from '../store/slices/bookingSlice';
+import { bookingSummaryStyles } from '../styles/bookingSummaryStyles';
 import { useAppTheme } from '../theme/ThemeProvider';
+import { formatResourceName } from '../utils/formatResourceName';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SlotSelect'>;
 
@@ -23,8 +25,17 @@ export function SlotSelectScreen({ navigation }: Props) {
   const { t } = useTranslation();
   const { theme } = useAppTheme();
   const dispatch = useAppDispatch();
-  const { tenantId, resourceId, serviceId, selectedDate, slots, slotsStatus, slotsError } =
+  const { tenantId, resourceId, serviceId, resources, services, selectedDate, slots, slotsStatus, slotsError } =
     useAppSelector((s) => s.booking);
+
+  const { resourceSummaryName, serviceSummaryName } = useMemo(() => {
+    const r = resourceId ? resources.find((x) => x.id === resourceId) : undefined;
+    const svc = serviceId ? services.find((x) => x.serviceId === serviceId) : undefined;
+    return {
+      resourceSummaryName: r ? formatResourceName(r) : null,
+      serviceSummaryName: svc?.service.name ?? null,
+    };
+  }, [resourceId, serviceId, resources, services]);
 
   useEffect(() => {
     if (!tenantId || !resourceId || !serviceId || !selectedDate || slotsStatus !== 'idle') return;
@@ -53,8 +64,32 @@ export function SlotSelectScreen({ navigation }: Props) {
 
   const today = format(new Date(), 'yyyy-MM-dd');
   const markedDates = selectedDate
-    ? { [selectedDate]: { selected: true, selectedColor: theme.colors.primary } }
+    ? { [selectedDate]: { selected: true, selectedColor: theme.colors.background } }
     : {};
+
+  const calendarTheme = useMemo(
+    () => ({
+      backgroundColor: theme.colors.contrast,
+      calendarBackground: theme.colors.contrast,
+      selectedDayBackgroundColor: theme.colors.background,
+      selectedDayTextColor: theme.colors.text,
+      dayTextColor: theme.colors.text,
+      monthTextColor: theme.colors.text,
+      todayTextColor: theme.colors.text,
+      arrowColor: theme.colors.text,
+      textDisabledColor: theme.colors.text,
+      textInactiveColor: theme.colors.text,
+      textSectionTitleColor: theme.colors.background,
+      textSectionTitleDisabledColor: theme.colors.background,
+      textMonthFontSize: 18,
+      textMonthFontWeight: '600' as const,
+      textDayHeaderFontSize: 12,
+      textDayHeaderFontWeight: '500' as const,
+      textDayFontSize: 15,
+      weekVerticalMargin: 10,
+    }),
+    [theme],
+  );
 
   const slotsLoading = slotsStatus === 'loading';
   const slotsFailed = slotsStatus === 'failed' && slotsError;
@@ -62,25 +97,60 @@ export function SlotSelectScreen({ navigation }: Props) {
 
   return (
     <ScreenScroll>
-      <Calendar
-        onDayPress={onDayPress}
-        markedDates={markedDates}
-        minDate={today}
-        theme={{
-          backgroundColor: theme.colors.surface,
-          calendarBackground: theme.colors.surface,
-          selectedDayBackgroundColor: theme.colors.primary,
-          selectedDayTextColor: theme.colors.onPrimary,
-          dayTextColor: theme.colors.textPrimary,
-          monthTextColor: theme.colors.textPrimary,
-          todayTextColor: theme.colors.primary,
-          arrowColor: theme.colors.primary,
-          textDisabledColor: theme.colors.textSecondary,
-        }}
-      />
+      {(resourceSummaryName || serviceSummaryName) && (
+        <View
+          style={[
+            bookingSummaryStyles.card,
+            {
+              backgroundColor: theme.colors.background,
+              borderBottomWidth: 1,
+              borderBottomColor: theme.colors.contrast,
+            },
+          ]}
+        >
+          {resourceSummaryName ? (
+            <View style={bookingSummaryStyles.block}>
+              <Text style={[bookingSummaryStyles.label, { color: theme.colors.contrast }]}>{t('confirmation.provider')}:</Text>
+              <Text style={[bookingSummaryStyles.value, { color: theme.colors.contrast }]}>{resourceSummaryName}</Text>
+            </View>
+          ) : null}
+          {serviceSummaryName ? (
+            <View style={bookingSummaryStyles.block}>
+              <Text style={[bookingSummaryStyles.label, { color: theme.colors.contrast }]}>{t('confirmation.service')}:</Text>
+              <Text style={[bookingSummaryStyles.value, { color: theme.colors.contrast }]}>{serviceSummaryName}</Text>
+            </View>
+          ) : null}
+        </View>
+      )}
+
+      <View
+        style={[
+          styles.calendarShell,
+          {
+            backgroundColor: theme.colors.contrast,
+            borderColor: theme.colors.background,
+          },
+          Platform.OS === 'ios'
+            ? {
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.12,
+                shadowRadius: 12,
+              }
+            : { elevation: 6 },
+        ]}
+      >
+        <Calendar
+          onDayPress={onDayPress}
+          markedDates={markedDates}
+          minDate={today}
+          theme={calendarTheme}
+          hideExtraDays
+        />
+      </View>
 
       {!selectedDate && (
-        <Text style={[styles.hint, { color: theme.colors.textSecondary }, styles.pickHint]}>
+        <Text style={[styles.hint, { color: theme.colors.text }, styles.pickHint]}>
           {t('slotSelect.pickDate')}
         </Text>
       )}
@@ -88,7 +158,7 @@ export function SlotSelectScreen({ navigation }: Props) {
       {selectedDate && slotsLoading && (
         <View style={styles.centered}>
           <ActivityIndicator size="small" />
-          <Text style={[styles.hint, { color: theme.colors.textSecondary }]}>
+          <Text style={[styles.hint, { color: theme.colors.text }]}>
             {t('slotSelect.loadingSlots')}
           </Text>
         </View>
@@ -96,7 +166,7 @@ export function SlotSelectScreen({ navigation }: Props) {
 
       {selectedDate && slotsFailed && (
         <View style={styles.block}>
-          <Text style={[styles.errorText, { color: theme.colors.error }]}>
+          <Text style={[styles.errorText, { color: theme.colors.text }]}>
             {t('slotSelect.slotsError')}
           </Text>
           <PrimaryButton onPress={onRetry}>{t('slotSelect.retry')}</PrimaryButton>
@@ -104,7 +174,7 @@ export function SlotSelectScreen({ navigation }: Props) {
       )}
 
       {selectedDate && showSlots && slots.length === 0 && (
-        <Text style={[styles.hint, { color: theme.colors.textSecondary }]}>{t('slotSelect.noSlots')}</Text>
+        <Text style={[styles.hint, { color: theme.colors.text }]}>{t('slotSelect.noSlots')}</Text>
       )}
 
       {selectedDate && showSlots && slots.length > 0 && (
@@ -120,13 +190,13 @@ export function SlotSelectScreen({ navigation }: Props) {
                 style={({ pressed }) => [
                   styles.slotChip,
                   {
-                    backgroundColor: theme.colors.secondary,
-                    borderColor: theme.colors.primary,
+                    backgroundColor: theme.colors.contrast,
+                    borderColor: theme.colors.background,
                   },
                   pressed && styles.slotChipPressed,
                 ]}
               >
-                <Text style={[styles.slotText, { color: theme.colors.textPrimary }]}>{label}</Text>
+                <Text style={[styles.slotText, { color: theme.colors.text }]}>{label}</Text>
               </Pressable>
             );
           })}
@@ -137,6 +207,12 @@ export function SlotSelectScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
+  calendarShell: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    borderWidth: 1,
+    marginBottom: 4,
+  },
   hint: { marginTop: 12, fontSize: 15 },
   pickHint: { textAlign: 'center', marginVertical: 16 },
   errorText: { marginBottom: 12, fontSize: 15 },

@@ -1,21 +1,25 @@
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
-
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { cancelAppointment } from '../api/appointments';
-import { PrimaryButton } from '../components/PrimaryButton';
-import { TENANT_SLUG } from '../constants/env';
 import { getTenantBySlug } from '../api/tenants';
-import { ScreenScroll } from '../components/ScreenScroll';
+import { TENANT_SLUG } from '../constants/env';
+import { bookingSummaryStyles } from '../styles/bookingSummaryStyles';
 import { useAppTheme } from '../theme/ThemeProvider';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../navigation/types';
 
 export function CancelAppointmentScreen() {
   const { t } = useTranslation();
   const { theme } = useAppTheme();
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [cancellationCode, setCancellationCode] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'succeeded' | 'failed'>('idle');
   const [message, setMessage] = useState<string | null>(null);
@@ -50,69 +54,131 @@ export function CancelAppointmentScreen() {
   }, [cancellationCode, t]);
 
   return (
-    <ScreenScroll>
-      <Text style={[styles.title, { color: theme.colors.textPrimary }]}>{t('screens.cancelAppointment')}</Text>
-      <Text style={[styles.hint, { color: theme.colors.textSecondary }]}>{t('cancelAppointment.hint')}</Text>
-
-      <Text style={[styles.inputLabel, { color: theme.colors.textPrimary }]}>{t('cancelAppointment.code')}</Text>
-      <TextInput
-        style={[
-          styles.input,
-          {
-            borderColor: theme.colors.border,
-            color: theme.colors.textPrimary,
-            backgroundColor: theme.colors.surface,
-          },
-        ]}
-        placeholder={t('cancelAppointment.codePlaceholder')}
-        placeholderTextColor={theme.colors.textSecondary}
-        value={cancellationCode}
-        onChangeText={setCancellationCode}
-        autoCapitalize="characters"
-        autoCorrect={false}
-      />
-
-      {message ? (
-        <Text
-          style={[
-            styles.message,
-            { color: status === 'succeeded' ? theme.colors.success : theme.colors.error },
-          ]}
-        >
-          {message}
+    <SafeAreaView style={[styles.root, { backgroundColor: theme.colors.background }]} edges={['top', 'left', 'right', 'bottom']}>
+    <KeyboardAvoidingView
+      style={styles.flex}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <View style={styles.middle}>
+        <Text style={[bookingSummaryStyles.label, styles.heading, { color: theme.colors.contrast }]}>
+          {t('cancelAppointment.heading')}
         </Text>
-      ) : null}
 
-      {status === 'loading' ? (
-        <View style={styles.loadingRow}>
-          <ActivityIndicator size="small" />
-          <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
-            {t('cancelAppointment.submitting')}
-          </Text>
-        </View>
-      ) : (
-        <PrimaryButton onPress={() => void onCancelAppointment()}>
-          {t('cancelAppointment.submit')}
-        </PrimaryButton>
-      )}
-      <PrimaryButton onPress={() => navigation.goBack()}>{t('screens.back')}</PrimaryButton>
-    </ScreenScroll>
+        <TextInput
+          style={[
+            styles.field,
+            styles.fieldInput,
+            {
+              borderColor: theme.colors.background,
+              backgroundColor: theme.colors.contrast,
+              color: theme.colors.text,
+            },
+          ]}
+          textAlignVertical="center"
+          placeholder={t('cancelAppointment.codePlaceholder')}
+          placeholderTextColor={theme.colors.text}
+          value={cancellationCode}
+          onChangeText={setCancellationCode}
+          autoCapitalize="characters"
+          autoCorrect={false}
+          editable={status !== 'loading'}
+        />
+
+        <Text style={[styles.hintBelow, { color: theme.colors.contrast }]}>{t('cancelAppointment.hint')}</Text>
+
+        {message ? (
+          <Text style={[styles.message, { color: theme.colors.contrast }]}>{message}</Text>
+        ) : null}
+      </View>
+
+      <View style={styles.footer}>
+        {status === 'loading' ? (
+          <View
+            style={[
+              styles.field,
+              styles.fieldButton,
+              { borderColor: theme.colors.background, backgroundColor: theme.colors.contrast },
+            ]}
+          >
+            <ActivityIndicator color={theme.colors.text} />
+          </View>
+        ) : (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => void onCancelAppointment()}
+            style={({ pressed }) => [
+              styles.field,
+              styles.fieldButton,
+              {
+                backgroundColor: theme.colors.contrast,
+                borderColor: theme.colors.background,
+              },
+              pressed && styles.pressed,
+            ]}
+          >
+            <Text style={[styles.buttonLabel, { color: theme.colors.text }]}>
+              {t('cancelAppointment.submit')}
+            </Text>
+          </Pressable>
+        )}
+      </View>
+    </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
+const FIELD_HEIGHT = 48;
+
 const styles = StyleSheet.create({
-  title: { fontSize: 22, fontWeight: '600', marginBottom: 12 },
-  hint: { marginBottom: 16 },
-  inputLabel: { fontSize: 14, fontWeight: '600', marginBottom: 6, marginTop: 8 },
-  input: {
+  root: { flex: 1 },
+  flex: { flex: 1 },
+  middle: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 20,
+  },
+  heading: {
+    textAlign: 'left',
+    marginBottom: 16,
+  },
+  field: {
+    alignSelf: 'stretch',
+    width: '100%',
+    height: FIELD_HEIGHT,
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 15,
-    marginBottom: 4,
   },
-  message: { marginTop: 12, marginBottom: 4, fontSize: 14 },
-  loadingRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 12 },
-  loadingText: { fontSize: 14 },
+  fieldInput: {
+    paddingVertical: 12,
+    fontSize: 16,
+  },
+  fieldButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 0,
+  },
+  hintBelow: {
+    fontSize: 14,
+    fontWeight: '400',
+    textAlign: 'left',
+    marginTop: 12,
+    lineHeight: 20,
+  },
+  message: {
+    marginTop: 16,
+    fontSize: 14,
+    textAlign: 'left',
+  },
+  footer: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 40,
+  },
+  buttonLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  pressed: { opacity: 0.85 },
 });

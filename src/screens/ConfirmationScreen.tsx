@@ -9,6 +9,7 @@ import { PrimaryButton } from '../components/PrimaryButton';
 import { ScreenScroll } from '../components/ScreenScroll';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { resetBookingDraft } from '../store/slices/bookingSlice';
+import { bookingSummaryStyles } from '../styles/bookingSummaryStyles';
 import { useAppTheme } from '../theme/ThemeProvider';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Confirmation'>;
@@ -31,33 +32,31 @@ export function ConfirmationScreen({ navigation }: Props) {
   return (
     <ScreenScroll>
       <Text style={styles.emoji}>✓</Text>
-      <Text style={[styles.title, { color: theme.colors.textPrimary }]}>{t('confirmation.title')}</Text>
+      <Text style={[styles.title, { color: theme.colors.text }]}>{t('confirmation.title')}</Text>
 
       {confirmation && (
-        <View style={[styles.card, { backgroundColor: theme.colors.surfaceMuted }]}>
-          <View style={styles.row}>
-            <Text style={[styles.rowLabel, { color: theme.colors.textSecondary }]}>
-              {t('confirmation.provider')}
-            </Text>
-            <Text style={[styles.rowValue, { color: theme.colors.textPrimary }]}>
-              {confirmation.resourceName}
-            </Text>
+        <View
+          style={[
+            bookingSummaryStyles.card,
+            {
+              backgroundColor: theme.colors.background,
+              borderBottomWidth: 1,
+              borderBottomColor: theme.colors.contrast,
+              marginBottom: 24,
+            },
+          ]}
+        >
+          <View style={bookingSummaryStyles.block}>
+            <Text style={[bookingSummaryStyles.label, { color: theme.colors.contrast }]}>{t('confirmation.provider')}:</Text>
+            <Text style={[bookingSummaryStyles.value, { color: theme.colors.contrast }]}>{confirmation.resourceName}</Text>
           </View>
-          <View style={[styles.divider, { backgroundColor: theme.colors.border }]} />
-          <View style={styles.row}>
-            <Text style={[styles.rowLabel, { color: theme.colors.textSecondary }]}>
-              {t('confirmation.service')}
-            </Text>
-            <Text style={[styles.rowValue, { color: theme.colors.textPrimary }]}>
-              {confirmation.serviceName}
-            </Text>
+          <View style={bookingSummaryStyles.block}>
+            <Text style={[bookingSummaryStyles.label, { color: theme.colors.contrast }]}>{t('confirmation.service')}:</Text>
+            <Text style={[bookingSummaryStyles.value, { color: theme.colors.contrast }]}>{confirmation.serviceName}</Text>
           </View>
-          <View style={[styles.divider, { backgroundColor: theme.colors.border }]} />
-          <View style={styles.row}>
-            <Text style={[styles.rowLabel, { color: theme.colors.textSecondary }]}>
-              {t('confirmation.dateTime')}
-            </Text>
-            <Text style={[styles.rowValue, { color: theme.colors.textPrimary }]}>
+          <View style={bookingSummaryStyles.block}>
+            <Text style={[bookingSummaryStyles.label, { color: theme.colors.contrast }]}>{t('confirmation.dateTime')}:</Text>
+            <Text style={[bookingSummaryStyles.value, { color: theme.colors.contrast }]}>
               {formatDateTime(confirmation.startAt)}
             </Text>
           </View>
@@ -72,14 +71,4 @@ export function ConfirmationScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   emoji: { fontSize: 48, textAlign: 'center', marginBottom: 8 },
   title: { fontSize: 24, fontWeight: '700', textAlign: 'center', marginBottom: 24 },
-  card: {
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginBottom: 24,
-  },
-  row: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 12 },
-  rowLabel: { fontSize: 14, flex: 1 },
-  rowValue: { fontSize: 14, fontWeight: '600', flex: 2, textAlign: 'right' },
-  divider: { height: 1 },
 });

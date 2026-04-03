@@ -7,7 +7,7 @@
     "cancel": "Cancel appointment"
   },
   "screens": {
-    "resourceSelect": "Choose a provider",
+    "resourceSelect": "Choose a service provider",
     "serviceSelect": "Choose a service",
     "slotSelect": "Pick date & time",
     "bookingForm": "Your details",
@@ -20,6 +20,7 @@
     "api": "API integration comes next — see project-context.md and api_reference."
   },
   "resourceSelect": {
+    "title": "Choose a service provider",
     "loading": "Loading providers…",
     "missingSlug": "Set EXPO_PUBLIC_TENANT_SLUG in your environment (see .env.example).",
     "tenantNotFound": "Salon not found. Check the tenant slug and try again.",
@@ -46,14 +47,13 @@
     "chooseSlotA11y": "Choose slot {{time}}"
   },
   "bookingForm": {
+    "summaryDate": "Date",
+    "summaryStartTime": "Start time",
+    "summaryPrice": "Total",
     "name": "Full name",
-    "namePlaceholder": "e.g. Jane Doe",
     "email": "Email",
-    "emailPlaceholder": "you@example.com",
     "phone": "Phone",
-    "phonePlaceholder": "+1 555 000 0000",
     "notes": "Notes (optional)",
-    "notesPlaceholder": "Any requests or notes…",
     "submit": "Confirm booking",
     "submitting": "Booking…",
     "validationName": "Please enter your full name.",
@@ -71,6 +71,7 @@
   },
   "cancelAppointment": {
     "title": "Cancel appointment",
+    "heading": "Cancel your appointment",
     "hint": "Enter the cancellation code from your confirmation email.",
     "code": "Cancellation code",
     "codePlaceholder": "Enter code",
