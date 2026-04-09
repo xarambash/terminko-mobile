@@ -27,6 +27,7 @@
     "networkError": "Something went wrong. Check your connection and try again.",
     "resourcesError": "Could not load providers. Please try again.",
     "emptyList": "No providers are available right now.",
+    "provider": "Barber",
     "retry": "Try again",
     "chooseProviderA11y": "Choose provider {{name}}"
   },

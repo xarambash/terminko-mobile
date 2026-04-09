@@ -1,17 +1,19 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useMemo } from 'react';
-import { ActivityIndicator, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
 import { Calendar } from 'react-native-calendars';
 
 import type { RootStackParamList } from '../navigation/types';
+import { AppText } from '../components/AppText';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ScreenScroll } from '../components/ScreenScroll';
 import { fetchSlots } from '../store/bookingThunks';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setSelectedDate, setSelectedSlot } from '../store/slices/bookingSlice';
 import { bookingSummaryStyles } from '../styles/bookingSummaryStyles';
+import { FONT_FAMILY_BODY } from '../theme/theme';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { formatResourceName } from '../utils/formatResourceName';
 
@@ -70,22 +72,26 @@ export function SlotSelectScreen({ navigation }: Props) {
   const calendarTheme = useMemo(
     () => ({
       backgroundColor: theme.colors.contrast,
-      calendarBackground: theme.colors.contrast,
+      calendarBackground: 'white',
       selectedDayBackgroundColor: theme.colors.background,
       selectedDayTextColor: theme.colors.text,
       dayTextColor: theme.colors.text,
       monthTextColor: theme.colors.text,
       todayTextColor: theme.colors.text,
       arrowColor: theme.colors.text,
-      textDisabledColor: theme.colors.text,
+      // Keep disabled dates clearly visible but visually distinct.
+      textDisabledColor: theme.mode === 'light' ? '#B9AFA2' : '#6B6B6B',
       textInactiveColor: theme.colors.text,
-      textSectionTitleColor: theme.colors.background,
+      textSectionTitleColor: theme.colors.text,
       textSectionTitleDisabledColor: theme.colors.background,
-      textMonthFontSize: 18,
+      textMonthFontFamily: FONT_FAMILY_BODY,
+      textDayFontFamily: FONT_FAMILY_BODY,
+      textDayHeaderFontFamily: FONT_FAMILY_BODY,
+      textMonthFontSize: 15,
       textMonthFontWeight: '600' as const,
       textDayHeaderFontSize: 12,
       textDayHeaderFontWeight: '500' as const,
-      textDayFontSize: 15,
+      textDayFontSize: 13,
       weekVerticalMargin: 10,
     }),
     [theme],
@@ -110,14 +116,14 @@ export function SlotSelectScreen({ navigation }: Props) {
         >
           {resourceSummaryName ? (
             <View style={bookingSummaryStyles.block}>
-              <Text style={[bookingSummaryStyles.label, { color: theme.colors.contrast }]}>{t('confirmation.provider')}:</Text>
-              <Text style={[bookingSummaryStyles.value, { color: theme.colors.contrast }]}>{resourceSummaryName}</Text>
+              <AppText style={[bookingSummaryStyles.label, { color: theme.colors.text }]}>{t('confirmation.provider')}:</AppText>
+              <AppText style={[bookingSummaryStyles.value, { color: theme.colors.text }]}>{resourceSummaryName}</AppText>
             </View>
           ) : null}
           {serviceSummaryName ? (
             <View style={bookingSummaryStyles.block}>
-              <Text style={[bookingSummaryStyles.label, { color: theme.colors.contrast }]}>{t('confirmation.service')}:</Text>
-              <Text style={[bookingSummaryStyles.value, { color: theme.colors.contrast }]}>{serviceSummaryName}</Text>
+              <AppText style={[bookingSummaryStyles.label, { color: theme.colors.text }]}>{t('confirmation.service')}:</AppText>
+              <AppText style={[bookingSummaryStyles.value, { color: theme.colors.text }]}>{serviceSummaryName}</AppText>
             </View>
           ) : null}
         </View>
@@ -127,8 +133,8 @@ export function SlotSelectScreen({ navigation }: Props) {
         style={[
           styles.calendarShell,
           {
-            backgroundColor: theme.colors.contrast,
-            borderColor: theme.colors.background,
+            backgroundColor: 'theme.colors.contrast',
+            borderColor: 'transparent',
           },
           Platform.OS === 'ios'
             ? {
@@ -144,37 +150,38 @@ export function SlotSelectScreen({ navigation }: Props) {
           onDayPress={onDayPress}
           markedDates={markedDates}
           minDate={today}
+          disableAllTouchEventsForDisabledDays
           theme={calendarTheme}
           hideExtraDays
         />
       </View>
 
       {!selectedDate && (
-        <Text style={[styles.hint, { color: theme.colors.text }, styles.pickHint]}>
+        <AppText style={[styles.hint, { color: theme.colors.text }, styles.pickHint]}>
           {t('slotSelect.pickDate')}
-        </Text>
+        </AppText>
       )}
 
       {selectedDate && slotsLoading && (
         <View style={styles.centered}>
           <ActivityIndicator size="small" />
-          <Text style={[styles.hint, { color: theme.colors.text }]}>
+          <AppText style={[styles.hint, { color: theme.colors.text }]}>
             {t('slotSelect.loadingSlots')}
-          </Text>
+          </AppText>
         </View>
       )}
 
       {selectedDate && slotsFailed && (
         <View style={styles.block}>
-          <Text style={[styles.errorText, { color: theme.colors.text }]}>
+          <AppText style={[styles.errorText, { color: theme.colors.error }]}>
             {t('slotSelect.slotsError')}
-          </Text>
+          </AppText>
           <PrimaryButton onPress={onRetry}>{t('slotSelect.retry')}</PrimaryButton>
         </View>
       )}
 
       {selectedDate && showSlots && slots.length === 0 && (
-        <Text style={[styles.hint, { color: theme.colors.text }]}>{t('slotSelect.noSlots')}</Text>
+        <AppText style={[styles.hint, { color: theme.colors.text }]}>{t('slotSelect.noSlots')}</AppText>
       )}
 
       {selectedDate && showSlots && slots.length > 0 && (
@@ -190,13 +197,13 @@ export function SlotSelectScreen({ navigation }: Props) {
                 style={({ pressed }) => [
                   styles.slotChip,
                   {
-                    backgroundColor: theme.colors.contrast,
-                    borderColor: theme.colors.background,
+                    backgroundColor: 'white',
+                    boxShadow: '0 0 3px 0 rgba(0, 0, 0, 0.6)'
                   },
                   pressed && styles.slotChipPressed,
                 ]}
               >
-                <Text style={[styles.slotText, { color: theme.colors.text }]}>{label}</Text>
+                <AppText style={[styles.slotText, { color: theme.colors.text }]}>{label}</AppText>
               </Pressable>
             );
           })}
@@ -226,10 +233,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   slotChip: {
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 8,
-    borderWidth: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    width: '31%',
+    flexGrow: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
   },
   slotChipPressed: { opacity: 0.75 },
   slotText: { fontSize: 14, fontWeight: '500' },

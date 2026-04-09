@@ -5,14 +5,14 @@ import {
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
-  Text,
-  TextInput,
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
 
 import type { RootStackParamList } from '../navigation/types';
+import { AppText } from '../components/AppText';
+import { AppTextInput } from '../components/AppTextInput';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ScreenScroll } from '../components/ScreenScroll';
 import { submitBooking } from '../store/bookingThunks';
@@ -135,34 +135,34 @@ export function BookingFormScreen({ navigation }: Props) {
           ]}
         >
           <View style={bookingSummaryStyles.block}>
-            <Text style={[bookingSummaryStyles.label, { color: theme.colors.contrast }]}>{t('confirmation.provider')}:</Text>
-            <Text style={[bookingSummaryStyles.value, { color: theme.colors.contrast }]}>{resourceName}</Text>
+            <AppText style={[bookingSummaryStyles.label, { color: theme.colors.text }]}>{t('confirmation.provider')}:</AppText>
+            <AppText style={[bookingSummaryStyles.value, { color: theme.colors.text }]}>{resourceName}</AppText>
           </View>
           <View style={bookingSummaryStyles.block}>
-            <Text style={[bookingSummaryStyles.label, { color: theme.colors.contrast }]}>{t('confirmation.service')}:</Text>
-            <Text style={[bookingSummaryStyles.value, { color: theme.colors.contrast }]}>{serviceName}</Text>
+            <AppText style={[bookingSummaryStyles.label, { color: theme.colors.text }]}>{t('confirmation.service')}:</AppText>
+            <AppText style={[bookingSummaryStyles.value, { color: theme.colors.text }]}>{serviceName}</AppText>
           </View>
           <View style={bookingSummaryStyles.block}>
-            <Text style={[bookingSummaryStyles.label, { color: theme.colors.contrast }]}>{t('bookingForm.summaryDate')}:</Text>
-            <Text style={[bookingSummaryStyles.value, { color: theme.colors.contrast }]}>{summaryDate}</Text>
+            <AppText style={[bookingSummaryStyles.label, { color: theme.colors.text }]}>{t('bookingForm.summaryDate')}:</AppText>
+            <AppText style={[bookingSummaryStyles.value, { color: theme.colors.text }]}>{summaryDate}</AppText>
           </View>
           <View style={bookingSummaryStyles.block}>
-            <Text style={[bookingSummaryStyles.label, { color: theme.colors.contrast }]}>{t('bookingForm.summaryStartTime')}:</Text>
-            <Text style={[bookingSummaryStyles.value, { color: theme.colors.contrast }]}>{summaryTime}</Text>
+            <AppText style={[bookingSummaryStyles.label, { color: theme.colors.text }]}>{t('bookingForm.summaryStartTime')}:</AppText>
+            <AppText style={[bookingSummaryStyles.value, { color: theme.colors.text }]}>{summaryTime}</AppText>
           </View>
           <View style={bookingSummaryStyles.block}>
-            <Text style={[bookingSummaryStyles.label, { color: theme.colors.contrast }]}>{t('bookingForm.summaryPrice')}:</Text>
-            <Text style={[bookingSummaryStyles.value, { color: theme.colors.contrast }]}>{selectedService?.price ?? ''}</Text>
+            <AppText style={[bookingSummaryStyles.label, { color: theme.colors.text }]}>{t('bookingForm.summaryPrice')}:</AppText>
+            <AppText style={[bookingSummaryStyles.value, { color: theme.colors.text }]}>{selectedService?.price ?? ''}</AppText>
           </View>
         </View>
 
         <View style={styles.form}>
-          <TextInput
+          <AppTextInput
             style={[
               styles.input,
               {
-                borderColor: fieldErrors.name ? theme.colors.text : theme.colors.background,
-                backgroundColor: theme.colors.contrast,
+                borderColor: fieldErrors.name ? theme.colors.error : theme.colors.text,
+                backgroundColor: 'transparent',
                 color: theme.colors.text,
               },
             ]}
@@ -176,15 +176,15 @@ export function BookingFormScreen({ navigation }: Props) {
             returnKeyType="next"
           />
           {fieldErrors.name ? (
-            <Text style={[styles.fieldError, { color: theme.colors.text }]}>{fieldErrors.name}</Text>
+            <AppText style={[styles.fieldError, { color: theme.colors.error }]}>{fieldErrors.name}</AppText>
           ) : null}
 
-          <TextInput
+          <AppTextInput
             style={[
               styles.input,
               {
-                borderColor: fieldErrors.email ? theme.colors.text : theme.colors.background,
-                backgroundColor: theme.colors.contrast,
+                borderColor: fieldErrors.email ? theme.colors.error : theme.colors.text,
+                backgroundColor: 'transparent',
                 color: theme.colors.text,
               },
             ]}
@@ -199,15 +199,15 @@ export function BookingFormScreen({ navigation }: Props) {
             returnKeyType="next"
           />
           {fieldErrors.email ? (
-            <Text style={[styles.fieldError, { color: theme.colors.text }]}>{fieldErrors.email}</Text>
+            <AppText style={[styles.fieldError, { color: theme.colors.error }]}>{fieldErrors.email}</AppText>
           ) : null}
 
-          <TextInput
+          <AppTextInput
             style={[
               styles.input,
               {
-                borderColor: fieldErrors.phone ? theme.colors.text : theme.colors.background,
-                backgroundColor: theme.colors.contrast,
+                borderColor: fieldErrors.phone ? theme.colors.error : theme.colors.text,
+                backgroundColor: 'transparent',
                 color: theme.colors.text,
               },
             ]}
@@ -221,16 +221,16 @@ export function BookingFormScreen({ navigation }: Props) {
             returnKeyType="next"
           />
           {fieldErrors.phone ? (
-            <Text style={[styles.fieldError, { color: theme.colors.text }]}>{fieldErrors.phone}</Text>
+            <AppText style={[styles.fieldError, { color: theme.colors.error }]}>{fieldErrors.phone}</AppText>
           ) : null}
 
-          <TextInput
+          <AppTextInput
             style={[
               styles.input,
               styles.notesInput,
               {
-                borderColor: theme.colors.background,
-                backgroundColor: theme.colors.contrast,
+                borderColor: theme.colors.text,
+                backgroundColor: 'transparent',
                 color: theme.colors.text,
               },
             ]}
@@ -248,22 +248,22 @@ export function BookingFormScreen({ navigation }: Props) {
             <View
               style={[
                 styles.errorBox,
-                { backgroundColor: theme.colors.contrast, borderColor: theme.colors.text },
+                { backgroundColor: theme.colors.contrast, borderColor: theme.colors.error },
               ]}
             >
-              <Text style={[styles.errorTitle, { color: theme.colors.text }]}>{t('bookingForm.errorTitle')}</Text>
-              <Text style={[styles.errorText, { color: theme.colors.text }]}>
+              <AppText style={[styles.errorTitle, { color: theme.colors.error }]}>{t('bookingForm.errorTitle')}</AppText>
+              <AppText style={[styles.errorText, { color: theme.colors.error }]}>
                 {submitError === 'network' ? t('bookingForm.errorNetwork') : submitError}
-              </Text>
+              </AppText>
             </View>
           ) : null}
 
           {submitting ? (
             <View style={styles.loadingRow}>
               <ActivityIndicator size="small" />
-              <Text style={[styles.loadingText, { color: theme.colors.text }]}>
+              <AppText style={[styles.loadingText, { color: theme.colors.text }]}>
                 {t('bookingForm.submitting')}
-              </Text>
+              </AppText>
             </View>
           ) : (
             <PrimaryButton onPress={onSubmit}>{t('bookingForm.submit')}</PrimaryButton>

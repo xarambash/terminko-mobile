@@ -1,10 +1,11 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { TENANT_SLUG } from '../constants/env';
 import type { RootStackParamList } from '../navigation/types';
+import { AppText } from '../components/AppText';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ScreenScroll } from '../components/ScreenScroll';
 import { fetchResources, fetchTenantBySlug } from '../store/bookingThunks';
@@ -46,7 +47,7 @@ function ResourceAvatar({
           onError={() => setFailed(true)}
         />
       ) : (
-        <Text style={[styles.avatarInitial, { color: theme.colors.text }]}>{initial}</Text>
+        <AppText style={[styles.avatarInitial, { color: theme.colors.text }]}>{initial}</AppText>
       )}
     </View>
   );
@@ -105,48 +106,48 @@ export function ResourceSelectScreen({ navigation }: Props) {
   return (
     <ScreenScroll>
       {!missingSlug && (
-        <Text style={[bookingSummaryStyles.pageHeading, { color: theme.colors.contrast }]}>
+        <AppText style={[bookingSummaryStyles.pageHeading, { color: theme.colors.text }]}>
           {t('resourceSelect.title')}
-        </Text>
+        </AppText>
       )}
 
       {missingSlug && (
-        <Text style={[styles.errorText, { color: theme.colors.text }]}>
+        <AppText style={[styles.errorText, { color: theme.colors.error }]}>
           {t('resourceSelect.missingSlug')}
-        </Text>
+        </AppText>
       )}
 
       {!missingSlug && loading && (
         <View style={styles.centered}>
           <ActivityIndicator size="large" />
-          <Text style={[styles.hint, { color: theme.colors.text }]}>{t('resourceSelect.loading')}</Text>
+          <AppText style={[styles.hint, { color: theme.colors.text }]}>{t('resourceSelect.loading')}</AppText>
         </View>
       )}
 
       {!missingSlug && tenantFailed && (
         <View style={styles.block}>
-          <Text style={[styles.errorText, { color: theme.colors.text }]}>
+          <AppText style={[styles.errorText, { color: theme.colors.error }]}>
             {tenantErrorCode === 'tenantNotFound'
               ? t('resourceSelect.tenantNotFound')
               : t('resourceSelect.networkError')}
-          </Text>
+          </AppText>
           <PrimaryButton onPress={onRetryTenant}>{t('resourceSelect.retry')}</PrimaryButton>
         </View>
       )}
 
       {!missingSlug && tenantStatus === 'succeeded' && resourcesFailed && (
         <View style={styles.block}>
-          <Text style={[styles.errorText, { color: theme.colors.text }]}>
+          <AppText style={[styles.errorText, { color: theme.colors.error }]}>
             {t('resourceSelect.resourcesError')}
-          </Text>
+          </AppText>
           <PrimaryButton onPress={onRetryResources}>{t('resourceSelect.retry')}</PrimaryButton>
         </View>
       )}
 
       {showList && resources.length === 0 && (
-        <Text style={[styles.hint, { color: theme.colors.text }]}>
+        <AppText style={[styles.hint, { color: theme.colors.text }]}>
           {t('resourceSelect.emptyList')}
-        </Text>
+        </AppText>
       )}
 
       {showList &&
@@ -159,20 +160,21 @@ export function ResourceSelectScreen({ navigation }: Props) {
               name: formatResourceName(item),
             })}
             onPress={() => onSelectResource(item.id)}
-            style={({ pressed }) => [
-              styles.row,
-              { backgroundColor: theme.colors.contrast },
-              pressed && styles.rowPressed,
-            ]}
+            style={[styles.row, { backgroundColor: 'white' }]}
           >
             <ResourceAvatar
               key={`${item.id}-${item.profilePicture ?? ''}`}
-              uri={item.profilePicture}
+              uri='https://www.shutterstock.com/image-photo/beauty-charisma-head-shot-portrait-600nw-2647728057.jpg'
               fallbackLabel={formatResourceName(item)}
             />
-            <Text style={[styles.rowText, { color: theme.colors.text }]}>
-              {formatResourceName(item)}
-            </Text>
+            <View style={styles.rowTextContainer}>
+              <AppText style={[styles.rowText, { color: theme.colors.text }]}>
+                {formatResourceName(item)}
+              </AppText>
+              <AppText style={[styles.rowSmallerText, { color: theme.colors.text }]}>
+                {t('resourceSelect.provider')}
+              </AppText>
+            </View>
           </Pressable>
         ))}
     </ScreenScroll>
@@ -185,20 +187,30 @@ const styles = StyleSheet.create({
   centered: { alignItems: 'center', paddingVertical: 24 },
   block: { marginBottom: 8 },
   row: {
+    display: 'flex',
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 16,
+    gap: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
     borderRadius: 10,
     marginBottom: 8,
+    boxShadow: '0 0 4px 0 rgba(0, 0, 0, 0.4)',
   },
   rowPressed: { opacity: 0.85 },
-  rowText: { fontSize: 16, fontWeight: '500', textAlign: 'center' },
+  rowTextContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  rowText: { fontSize: 20, fontWeight: '500', textAlign: 'center' },
+  rowSmallerText: {fontSize: 14, fontWeight: '500', textAlign: 'center'},
   avatarOuter: {
-    width: 88,
-    height: 88,
+    width: 74,
+    height: 74,
     borderRadius: 44,
     borderWidth: 1,
-    marginBottom: 10,
     overflow: 'hidden',
     justifyContent: 'center',
     alignItems: 'center',

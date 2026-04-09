@@ -1,24 +1,20 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useMemo } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import type { RootStackParamList } from '../navigation/types';
+import { AppText } from '../components/AppText';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ScreenScroll } from '../components/ScreenScroll';
 import { fetchServices } from '../store/bookingThunks';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { pickService } from '../store/slices/bookingSlice';
-import type { ResourceService } from '../api/types';
 import { bookingSummaryStyles } from '../styles/bookingSummaryStyles';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { formatResourceName } from '../utils/formatResourceName';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ServiceSelect'>;
-
-function effectiveDuration(s: ResourceService): number {
-  return s.durationOverride ?? s.service.durationMinutes;
-}
 
 export function ServiceSelectScreen({ navigation }: Props) {
   const { t } = useTranslation();
@@ -63,15 +59,15 @@ export function ServiceSelectScreen({ navigation }: Props) {
           style={[
             bookingSummaryStyles.card,
             {
-              backgroundColor: theme.colors.background,
+              backgroundColor: 'theme.colors.background',
               borderBottomWidth: 1,
               borderBottomColor: theme.colors.contrast,
             },
           ]}
         >
           <View style={bookingSummaryStyles.block}>
-            <Text style={[bookingSummaryStyles.label, { color: theme.colors.contrast }]}>{t('confirmation.provider')}:</Text>
-            <Text style={[bookingSummaryStyles.value, { color: theme.colors.contrast }]}>{selectedResourceName}</Text>
+            <AppText style={[bookingSummaryStyles.label, { color: theme.colors.text }]}>{t('confirmation.provider')}:</AppText>
+            <AppText style={[bookingSummaryStyles.value, { color: theme.colors.text }]}>{selectedResourceName}</AppText>
           </View>
         </View>
       ) : null}
@@ -79,21 +75,21 @@ export function ServiceSelectScreen({ navigation }: Props) {
       {loading && (
         <View style={styles.centered}>
           <ActivityIndicator size="large" />
-          <Text style={[styles.hint, { color: theme.colors.text }]}>{t('serviceSelect.loading')}</Text>
+          <AppText style={[styles.hint, { color: theme.colors.text }]}>{t('serviceSelect.loading')}</AppText>
         </View>
       )}
 
       {failed && (
         <View style={styles.block}>
-          <Text style={[styles.errorText, { color: theme.colors.text }]}>{t('serviceSelect.error')}</Text>
+          <AppText style={[styles.errorText, { color: theme.colors.error }]}>{t('serviceSelect.error')}</AppText>
           <PrimaryButton onPress={onRetry}>{t('serviceSelect.retry')}</PrimaryButton>
         </View>
       )}
 
       {showList && services.length === 0 && (
-        <Text style={[styles.hint, { color: theme.colors.text }]}>
+        <AppText style={[styles.hint, { color: theme.colors.text }]}>
           {t('serviceSelect.emptyList')}
-        </Text>
+        </AppText>
       )}
 
       {showList &&
@@ -108,25 +104,22 @@ export function ServiceSelectScreen({ navigation }: Props) {
             onPress={() => onSelectService(item.serviceId)}
             style={({ pressed }) => [
               styles.row,
-              { backgroundColor: theme.colors.contrast },
+              { backgroundColor: 'white' },
               pressed && styles.rowPressed,
             ]}
           >
             <View style={styles.rowContent}>
-              <Text style={[styles.rowName, { color: theme.colors.text }]}>
+              <AppText style={[styles.rowName, { color: theme.colors.text }]}>
                 {item.service.name}
-              </Text>
+              </AppText>
               <View style={styles.rowMeta}>
-                <Text style={[styles.rowPrice, { color: theme.colors.text }]}>{item.price}</Text>
-                <Text style={[styles.rowDuration, { color: theme.colors.text }]}>
-                  {t('serviceSelect.min', { count: effectiveDuration(item) })}
-                </Text>
+                <AppText style={[styles.rowPrice, { color: theme.colors.text }]}>{item.price}</AppText>
               </View>
             </View>
             {item.service.description ? (
-              <Text style={[styles.rowDesc, { color: theme.colors.text }]}>
+              <AppText style={[styles.rowDesc, { color: theme.colors.text }]}>
                 {item.service.description}
-              </Text>
+              </AppText>
             ) : null}
           </Pressable>
         ))}
@@ -142,6 +135,7 @@ const styles = StyleSheet.create({
   row: {
     paddingVertical: 14,
     paddingHorizontal: 16,
+    boxShadow: '0 0 4px 0 rgba(0, 0, 0, 0.4)',
     borderRadius: 10,
     marginBottom: 8,
   },

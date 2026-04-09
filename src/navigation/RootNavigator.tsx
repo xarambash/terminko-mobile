@@ -8,6 +8,7 @@ import { LandingScreen } from '../screens/LandingScreen';
 import { ResourceSelectScreen } from '../screens/ResourceSelectScreen';
 import { ServiceSelectScreen } from '../screens/ServiceSelectScreen';
 import { SlotSelectScreen } from '../screens/SlotSelectScreen';
+import { FONT_FAMILY_BODY } from '../theme/theme';
 import { useAppTheme } from '../theme/ThemeProvider';
 import type { RootStackParamList } from './types';
 
@@ -24,7 +25,7 @@ export function RootNavigator() {
           headerShadowVisible: false,
           headerStyle: { backgroundColor: theme.colors.background },
           headerTintColor: theme.colors.text,
-          headerTitleStyle: { color: theme.colors.text },
+          headerTitleStyle: { color: theme.colors.text, fontFamily: FONT_FAMILY_BODY },
           contentStyle: { backgroundColor: theme.colors.background },
           animation: 'none',
           gestureEnabled: false,

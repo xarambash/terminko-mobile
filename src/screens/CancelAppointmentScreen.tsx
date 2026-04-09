@@ -5,8 +5,6 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  Text,
-  TextInput,
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -14,6 +12,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { cancelAppointment } from '../api/appointments';
 import { getTenantBySlug } from '../api/tenants';
 import { TENANT_SLUG } from '../constants/env';
+import { AppText } from '../components/AppText';
+import { AppTextInput } from '../components/AppTextInput';
 import { bookingSummaryStyles } from '../styles/bookingSummaryStyles';
 import { useAppTheme } from '../theme/ThemeProvider';
 
@@ -60,17 +60,17 @@ export function CancelAppointmentScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <View style={styles.middle}>
-        <Text style={[bookingSummaryStyles.label, styles.heading, { color: theme.colors.contrast }]}>
+        <AppText style={[bookingSummaryStyles.label, styles.heading, { color: theme.colors.text }]}>
           {t('cancelAppointment.heading')}
-        </Text>
+        </AppText>
 
-        <TextInput
+        <AppTextInput
           style={[
             styles.field,
             styles.fieldInput,
             {
-              borderColor: theme.colors.background,
-              backgroundColor: theme.colors.contrast,
+              borderColor: theme.colors.text,
+              backgroundColor: 'transparent',
               color: theme.colors.text,
             },
           ]}
@@ -84,10 +84,20 @@ export function CancelAppointmentScreen() {
           editable={status !== 'loading'}
         />
 
-        <Text style={[styles.hintBelow, { color: theme.colors.contrast }]}>{t('cancelAppointment.hint')}</Text>
+        <AppText style={[styles.hintBelow, { color: theme.colors.text }]}>{t('cancelAppointment.hint')}</AppText>
 
         {message ? (
-          <Text style={[styles.message, { color: theme.colors.contrast }]}>{message}</Text>
+          <AppText
+            style={[
+              styles.message,
+              {
+                color:
+                  status === 'succeeded' ? theme.colors.contrast : theme.colors.error,
+              },
+            ]}
+          >
+            {message}
+          </AppText>
         ) : null}
       </View>
 
@@ -111,14 +121,14 @@ export function CancelAppointmentScreen() {
               styles.fieldButton,
               {
                 backgroundColor: theme.colors.contrast,
-                borderColor: theme.colors.background,
+                borderColor: theme.colors.text,
               },
               pressed && styles.pressed,
             ]}
           >
-            <Text style={[styles.buttonLabel, { color: theme.colors.text }]}>
+            <AppText style={[styles.buttonLabel, { color: theme.colors.text }]}>
               {t('cancelAppointment.submit')}
-            </Text>
+            </AppText>
           </Pressable>
         )}
       </View>

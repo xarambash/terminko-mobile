@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
 
+import { AppText } from './AppText';
 import { useAppTheme } from '../theme/ThemeProvider';
 
 type Props = {
@@ -16,11 +17,11 @@ export function PrimaryButton({ children, onPress }: Props) {
       onPress={onPress}
       style={({ pressed }) => [
         styles.btn,
-        { backgroundColor: theme.colors.contrast },
+        { backgroundColor: 'white', borderColor: theme.colors.text },
         pressed && styles.pressed,
       ]}
     >
-      <Text style={[styles.label, { color: theme.colors.text }]}>{children}</Text>
+      <AppText style={[styles.label, { color: theme.colors.text }]}>{children}</AppText>
     </Pressable>
   );
 }
@@ -32,6 +33,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginVertical: 6,
     alignItems: 'center',
+    boxShadow: '0 0 4px 0 rgba(0, 0, 0, 0.4)',
   },
   pressed: { opacity: 0.85 },
   label: { fontSize: 16, fontWeight: '600' },

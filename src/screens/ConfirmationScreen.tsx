@@ -1,10 +1,11 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
 
 import type { RootStackParamList } from '../navigation/types';
+import { AppText } from '../components/AppText';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ScreenScroll } from '../components/ScreenScroll';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
@@ -31,8 +32,8 @@ export function ConfirmationScreen({ navigation }: Props) {
 
   return (
     <ScreenScroll>
-      <Text style={styles.emoji}>✓</Text>
-      <Text style={[styles.title, { color: theme.colors.text }]}>{t('confirmation.title')}</Text>
+      <AppText style={styles.emoji}>✓</AppText>
+      <AppText style={[styles.title, { color: theme.colors.text }]}>{t('confirmation.title')}</AppText>
 
       {confirmation && (
         <View
@@ -47,18 +48,18 @@ export function ConfirmationScreen({ navigation }: Props) {
           ]}
         >
           <View style={bookingSummaryStyles.block}>
-            <Text style={[bookingSummaryStyles.label, { color: theme.colors.contrast }]}>{t('confirmation.provider')}:</Text>
-            <Text style={[bookingSummaryStyles.value, { color: theme.colors.contrast }]}>{confirmation.resourceName}</Text>
+            <AppText style={[bookingSummaryStyles.label, { color: theme.colors.contrast }]}>{t('confirmation.provider')}:</AppText>
+            <AppText style={[bookingSummaryStyles.value, { color: theme.colors.contrast }]}>{confirmation.resourceName}</AppText>
           </View>
           <View style={bookingSummaryStyles.block}>
-            <Text style={[bookingSummaryStyles.label, { color: theme.colors.contrast }]}>{t('confirmation.service')}:</Text>
-            <Text style={[bookingSummaryStyles.value, { color: theme.colors.contrast }]}>{confirmation.serviceName}</Text>
+            <AppText style={[bookingSummaryStyles.label, { color: theme.colors.contrast }]}>{t('confirmation.service')}:</AppText>
+            <AppText style={[bookingSummaryStyles.value, { color: theme.colors.contrast }]}>{confirmation.serviceName}</AppText>
           </View>
           <View style={bookingSummaryStyles.block}>
-            <Text style={[bookingSummaryStyles.label, { color: theme.colors.contrast }]}>{t('confirmation.dateTime')}:</Text>
-            <Text style={[bookingSummaryStyles.value, { color: theme.colors.contrast }]}>
+            <AppText style={[bookingSummaryStyles.label, { color: theme.colors.contrast }]}>{t('confirmation.dateTime')}:</AppText>
+            <AppText style={[bookingSummaryStyles.value, { color: theme.colors.contrast }]}>
               {formatDateTime(confirmation.startAt)}
-            </Text>
+            </AppText>
           </View>
         </View>
       )}
