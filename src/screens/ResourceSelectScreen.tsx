@@ -1,61 +1,72 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Image, Pressable, StyleSheet, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import type { Resource } from '../api/types';
+import { BookingStepLayout } from '../components/booking-step-layout';
 import { TENANT_SLUG } from '../constants/env';
+import { bookingStepIndex } from '../constants/bookingFlow';
 import type { RootStackParamList } from '../navigation/types';
-import { AppText } from '../components/AppText';
-import { PrimaryButton } from '../components/PrimaryButton';
-import { ScreenScroll } from '../components/ScreenScroll';
 import { fetchResources, fetchTenantBySlug } from '../store/bookingThunks';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { pickResource } from '../store/slices/bookingSlice';
-import { bookingSummaryStyles } from '../styles/bookingSummaryStyles';
-import { useAppTheme } from '../theme/ThemeProvider';
-import { formatResourceName } from '../utils/formatResourceName';
+import { FONT_FAMILY_INITIALS, FONT_FAMILY_UI, landingBrand } from '../theme/theme';
+import { formatResourceInitials, formatResourceName } from '../utils/utils';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ResourceSelect'>;
 
-function ResourceAvatar({
-  uri,
-  fallbackLabel,
-}: {
-  uri: string | null;
-  fallbackLabel: string;
-}) {
-  const { theme } = useAppTheme();
+function ProviderAvatar({ resource }: { resource: Resource }) {
   const [failed, setFailed] = useState(false);
-  const showImage = Boolean(uri?.trim()) && !failed;
-  const initial = fallbackLabel.trim().charAt(0).toUpperCase() || '?';
+  const uri = resource.profilePicture?.trim() ?? '';
+  const showImage = Boolean(uri) && !failed;
+  const initials = formatResourceInitials(resource);
 
   return (
     <View
       style={[
         styles.avatarOuter,
         {
-          backgroundColor: theme.colors.contrast,
-          borderColor: theme.colors.background,
+          backgroundColor: landingBrand.background,
+          borderColor: landingBrand.avatarRing,
         },
       ]}
     >
       {showImage ? (
         <Image
-          source={{ uri: uri!.trim() }}
+          source={{ uri }}
           style={styles.avatarImage}
           resizeMode="cover"
           onError={() => setFailed(true)}
         />
       ) : (
-        <AppText style={[styles.avatarInitial, { color: theme.colors.text }]}>{initial}</AppText>
+        <Text style={styles.avatarInitials}>{initials}</Text>
       )}
     </View>
   );
 }
 
+function GoldRetryButton({ label, onPress }: { label: string; onPress: () => void }) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [styles.retryBtn, pressed && styles.pressed]}
+    >
+      <Text style={styles.retryLabel}>{label}</Text>
+    </Pressable>
+  );
+}
+
 export function ResourceSelectScreen({ navigation }: Props) {
   const { t } = useTranslation();
-  const { theme } = useAppTheme();
   const dispatch = useAppDispatch();
   const {
     tenantId,
@@ -102,55 +113,53 @@ export function ResourceSelectScreen({ navigation }: Props) {
     tenantStatus === 'succeeded' && resourcesStatus === 'succeeded' && !resourcesFailed;
 
   const missingSlug = !TENANT_SLUG;
+  const showFullScreenLoader = !missingSlug && loading;
+
+  const shellMode = showFullScreenLoader ? 'none' : missingSlug ? 'backOnly' : 'full';
 
   return (
-    <ScreenScroll>
-      {!missingSlug && (
-        <AppText style={[bookingSummaryStyles.pageHeading, { color: theme.colors.text }]}>
-          {t('resourceSelect.title')}
-        </AppText>
-      )}
+    <BookingStepLayout
+      variant="landing"
+      activeStep={bookingStepIndex.resource}
+      onBack={() => navigation.goBack()}
+      backAccessibilityLabel={t('screens.back')}
+      pageTitle={shellMode === 'full' ? t('resourceSelect.title') : undefined}
+      shellMode={shellMode}
+      safeAreaEdges={['top', 'left', 'right', 'bottom']}
+      contentContainerStyle={showFullScreenLoader ? styles.scrollContentCentered : undefined}
+    >
+      {missingSlug && <Text style={styles.errorText}>{t('resourceSelect.missingSlug')}</Text>}
 
-      {missingSlug && (
-        <AppText style={[styles.errorText, { color: theme.colors.error }]}>
-          {t('resourceSelect.missingSlug')}
-        </AppText>
-      )}
-
-      {!missingSlug && loading && (
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" />
-          <AppText style={[styles.hint, { color: theme.colors.text }]}>{t('resourceSelect.loading')}</AppText>
+      {showFullScreenLoader && (
+        <View style={styles.loaderWrap}>
+          <ActivityIndicator size="large" color={landingBrand.progressActive} />
         </View>
       )}
 
-      {!missingSlug && tenantFailed && (
+      {!showFullScreenLoader && !missingSlug && tenantFailed && (
         <View style={styles.block}>
-          <AppText style={[styles.errorText, { color: theme.colors.error }]}>
+          <Text style={styles.errorText}>
             {tenantErrorCode === 'tenantNotFound'
               ? t('resourceSelect.tenantNotFound')
               : t('resourceSelect.networkError')}
-          </AppText>
-          <PrimaryButton onPress={onRetryTenant}>{t('resourceSelect.retry')}</PrimaryButton>
+          </Text>
+          <GoldRetryButton label={t('resourceSelect.retry')} onPress={onRetryTenant} />
         </View>
       )}
 
-      {!missingSlug && tenantStatus === 'succeeded' && resourcesFailed && (
+      {!showFullScreenLoader && !missingSlug && tenantStatus === 'succeeded' && resourcesFailed && (
         <View style={styles.block}>
-          <AppText style={[styles.errorText, { color: theme.colors.error }]}>
-            {t('resourceSelect.resourcesError')}
-          </AppText>
-          <PrimaryButton onPress={onRetryResources}>{t('resourceSelect.retry')}</PrimaryButton>
+          <Text style={styles.errorText}>{t('resourceSelect.resourcesError')}</Text>
+          <GoldRetryButton label={t('resourceSelect.retry')} onPress={onRetryResources} />
         </View>
       )}
 
-      {showList && resources.length === 0 && (
-        <AppText style={[styles.hint, { color: theme.colors.text }]}>
-          {t('resourceSelect.emptyList')}
-        </AppText>
+      {!showFullScreenLoader && showList && resources.length === 0 && (
+        <Text style={styles.hint}>{t('resourceSelect.emptyList')}</Text>
       )}
 
-      {showList &&
+      {!showFullScreenLoader &&
+        showList &&
         resources.length > 0 &&
         resources.map((item) => (
           <Pressable
@@ -160,61 +169,105 @@ export function ResourceSelectScreen({ navigation }: Props) {
               name: formatResourceName(item),
             })}
             onPress={() => onSelectResource(item.id)}
-            style={[styles.row, { backgroundColor: 'white' }]}
+            style={({ pressed }) => [styles.card, pressed && styles.pressed]}
           >
-            <ResourceAvatar
-              key={`${item.id}-${item.profilePicture ?? ''}`}
-              uri='https://www.shutterstock.com/image-photo/beauty-charisma-head-shot-portrait-600nw-2647728057.jpg'
-              fallbackLabel={formatResourceName(item)}
-            />
-            <View style={styles.rowTextContainer}>
-              <AppText style={[styles.rowText, { color: theme.colors.text }]}>
-                {formatResourceName(item)}
-              </AppText>
-              <AppText style={[styles.rowSmallerText, { color: theme.colors.text }]}>
-                {t('resourceSelect.provider')}
-              </AppText>
+            <ProviderAvatar resource={item} />
+            <View style={styles.cardTextCol}>
+              <Text style={styles.cardName}>{formatResourceName(item)}</Text>
+              <Text style={styles.cardSubtitle}>{t('resourceSelect.provider')}</Text>
             </View>
+            <Text style={styles.chevron}>›</Text>
           </Pressable>
         ))}
-    </ScreenScroll>
+    </BookingStepLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  hint: { marginTop: 12, fontSize: 15 },
-  errorText: { marginBottom: 12, fontSize: 15 },
-  centered: { alignItems: 'center', paddingVertical: 24 },
-  block: { marginBottom: 8 },
-  row: {
-    display: 'flex',
+  scrollContentCentered: {
+    flexGrow: 1,
+    justifyContent: 'center',
+  },
+  hint: {
+    marginTop: 8,
+    fontSize: 18,
+    fontFamily: FONT_FAMILY_UI,
+    color: landingBrand.subtitle,
+  },
+  errorText: {
+    marginBottom: 16,
+    fontSize: 18,
+    lineHeight: 24,
+    fontFamily: FONT_FAMILY_UI,
+    color: landingBrand.title,
+  },
+  block: { marginBottom: 12 },
+  retryBtn: {
+    alignSelf: 'flex-start',
+    backgroundColor: landingBrand.primaryFill,
+    paddingVertical: 14,
+    paddingHorizontal: 22,
+    borderRadius: 12,
+  },
+  retryLabel: {
+    fontFamily: FONT_FAMILY_UI,
+    fontSize: 20,
+    color: landingBrand.primaryLabel,
+  },
+  pressed: { opacity: 0.88 },
+  card: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-    marginBottom: 8,
-    boxShadow: '0 0 4px 0 rgba(0, 0, 0, 0.4)',
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    borderRadius: 18,
+    marginBottom: 12,
+    backgroundColor: landingBrand.cardSurface,
+    borderWidth: 1,
+    borderColor: landingBrand.cardBorder,
   },
-  rowPressed: { opacity: 0.85 },
-  rowTextContainer: {
-    display: 'flex',
-    flexDirection: 'column',
+  cardTextCol: {
+    flex: 1,
+    marginLeft: 14,
     justifyContent: 'center',
-    alignItems: 'flex-start',
   },
-  rowText: { fontSize: 20, fontWeight: '500', textAlign: 'center' },
-  rowSmallerText: {fontSize: 14, fontWeight: '500', textAlign: 'center'},
+  cardName: {
+    fontFamily: FONT_FAMILY_UI,
+    fontSize: 24,
+    lineHeight: 28,
+    color: landingBrand.title,
+  },
+  cardSubtitle: {
+    fontFamily: FONT_FAMILY_UI,
+    fontSize: 16,
+    lineHeight: 20,
+    color: landingBrand.subtitle,
+    marginTop: 2,
+  },
+  chevron: {
+    fontSize: 28,
+    color: landingBrand.subtitle,
+    marginLeft: 8,
+    fontFamily: FONT_FAMILY_UI,
+  },
   avatarOuter: {
-    width: 74,
-    height: 74,
-    borderRadius: 44,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     borderWidth: 1,
     overflow: 'hidden',
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   avatarImage: { width: '100%', height: '100%' },
-  avatarInitial: { fontSize: 32, fontWeight: '600' },
+  avatarInitials: {
+    fontFamily: FONT_FAMILY_INITIALS,
+    fontSize: 18,
+    color: landingBrand.initialsGold,
+  },
+  loaderWrap: {
+    minHeight: 200,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });

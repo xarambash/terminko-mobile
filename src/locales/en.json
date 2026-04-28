@@ -1,16 +1,16 @@
 {
   "appName": "Terminko",
   "landing": {
-    "title": "Book your visit",
-    "subtitle": "Choose an option to continue",
+    "salonName": "Ana salon",
+    "tagline": "Book your next appointment",
     "book": "Schedule appointment",
     "cancel": "Cancel appointment"
   },
   "screens": {
-    "resourceSelect": "Choose a service provider",
+    "resourceSelect": "Choose a provider",
     "serviceSelect": "Choose a service",
-    "slotSelect": "Pick date & time",
-    "bookingForm": "Your details",
+    "slotSelect": "Pick date and time",
+    "bookingForm": "Confirm booking",
     "confirmation": "Booking confirmed",
     "cancelAppointment": "Cancel with code",
     "next": "Next",
@@ -20,7 +20,7 @@
     "api": "API integration comes next — see project-context.md and api_reference."
   },
   "resourceSelect": {
-    "title": "Choose a service provider",
+    "title": "Choose a provider",
     "loading": "Loading providers…",
     "missingSlug": "Set EXPO_PUBLIC_TENANT_SLUG in your environment (see .env.example).",
     "tenantNotFound": "Salon not found. Check the tenant slug and try again.",
@@ -32,6 +32,7 @@
     "chooseProviderA11y": "Choose provider {{name}}"
   },
   "serviceSelect": {
+    "providerLabel": "Provider",
     "loading": "Loading services…",
     "error": "Could not load services. Please try again.",
     "emptyList": "No services available for this provider.",
@@ -40,6 +41,9 @@
     "chooseServiceA11y": "Choose service {{name}}"
   },
   "slotSelect": {
+    "availableTimesLabel": "Available times",
+    "continue": "Continue",
+    "serviceLabel": "Service",
     "pickDate": "Select a date",
     "loadingSlots": "Loading available slots…",
     "slotsError": "Could not load slots. Please try again.",
@@ -48,14 +52,18 @@
     "chooseSlotA11y": "Choose slot {{time}}"
   },
   "bookingForm": {
+    "bookingOverview": "Booking overview",
+    "yourDetails": "YOUR DETAILS",
     "summaryDate": "Date",
+    "summaryTime": "Time",
     "summaryStartTime": "Start time",
     "summaryPrice": "Total",
     "name": "Full name",
-    "email": "Email",
-    "phone": "Phone",
+    "email": "Email address",
+    "phone": "Phone number",
     "notes": "Notes (optional)",
-    "submit": "Confirm booking",
+    "afterSubmitHint": "You'll receive a confirmation email after booking.",
+    "submit": "Confirm Booking",
     "submitting": "Booking…",
     "validationName": "Please enter your full name.",
     "validationEmail": "Please enter a valid email address.",

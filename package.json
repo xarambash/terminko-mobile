@@ -10,6 +10,9 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@expo-google-fonts/cormorant-garamond": "^0.4.1",
+    "@expo-google-fonts/dongle": "^0.4.1",
+    "@expo-google-fonts/explora": "^0.4.2",
     "@expo-google-fonts/inconsolata": "^0.4.2",
     "@expo-google-fonts/montserrat-alternates": "^0.4.1",
     "@expo-google-fonts/open-sans": "^0.4.2",

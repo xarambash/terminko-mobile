@@ -13,11 +13,43 @@ export type ThemeColors = {
 };
 
 /**
+ * Dark hero / landing palette from Figma (node 5:2 — Terminko mocks).
+ * Rest of the app keeps `lightTheme`; use this only on the landing flow.
+ */
+export const landingBrand = {
+  background: '#0f0d0b',
+  title: '#f2e8d9',
+  subtitle: '#9c8e7e',
+  primaryFill: '#d4bc94',
+  primaryLabel: '#0f0d0b',
+  outlineBorder: '#9c8e7e',
+  outlineLabel: '#f2e8d9',
+  accentLine: '#c4a574',
+  ornament: '#c4a574',
+  /** Provider list (Figma node 6:34) */
+  cardSurface: '#1a1816',
+  cardBorder: '#2c2620',
+  progressTrack: '#2c2620',
+  progressActive: '#c9995a',
+  initialsGold: '#c9995a',
+  avatarRing: '#c9995a',
+  backButtonBg: '#1a1816',
+  /** Small uppercase label on service screen (Figma 10:65). */
+  metaLabel: '#5c5248',
+} as const;
+
+/**
  * Single source for app typography. Change here + `useFonts` in App.tsx if you switch fonts.
- * Must match the key passed to `useFonts` from @expo-google-fonts/saira-stencil-one.
  */
 export const FONT_FAMILY_TITLE = 'MontserratAlternates_400Regular' as const;
 export const FONT_FAMILY_BODY = 'Ubuntu_400Regular' as const;
+/** Figma “Ana salon” script — Explora */
+export const FONT_FAMILY_DISPLAY = 'Explora_400Regular' as const;
+/** Figma UI copy — Dongle */
+export const FONT_FAMILY_UI = 'Dongle_400Regular' as const;
+export const FONT_FAMILY_UI_BOLD = 'Dongle_700Bold' as const;
+/** Avatar initials on dark cards — Cormorant Garamond (Figma 6:34) */
+export const FONT_FAMILY_INITIALS = 'CormorantGaramond_400Regular' as const;
 
 export type ThemeFonts = {
   body: typeof FONT_FAMILY_BODY;

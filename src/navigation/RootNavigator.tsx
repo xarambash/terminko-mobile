@@ -8,7 +8,7 @@ import { LandingScreen } from '../screens/LandingScreen';
 import { ResourceSelectScreen } from '../screens/ResourceSelectScreen';
 import { ServiceSelectScreen } from '../screens/ServiceSelectScreen';
 import { SlotSelectScreen } from '../screens/SlotSelectScreen';
-import { FONT_FAMILY_BODY } from '../theme/theme';
+import { FONT_FAMILY_BODY, landingBrand } from '../theme/theme';
 import { useAppTheme } from '../theme/ThemeProvider';
 import type { RootStackParamList } from './types';
 
@@ -31,27 +31,43 @@ export function RootNavigator() {
           gestureEnabled: false,
         }}
       > 
-        <Stack.Screen name="Landing" component={LandingScreen} options={{ title: '' }} />
+        <Stack.Screen
+          name="Landing"
+          component={LandingScreen}
+          options={{
+            title: '',
+            headerShown: false,
+            contentStyle: { backgroundColor: landingBrand.background },
+          }}
+        />
         <Stack.Screen
           name="ResourceSelect"
           component={ResourceSelectScreen}
-          options={{ title: '' }}
+          options={{
+            title: '',
+            headerShown: false,
+            contentStyle: { backgroundColor: landingBrand.background },
+          }}
         />
         <Stack.Screen
           name="ServiceSelect"
           component={ServiceSelectScreen}
-          options={{ title: '' }}
+          options={{ title: '', headerShown: false }}
         />
-        <Stack.Screen name="SlotSelect" component={SlotSelectScreen} options={{ title: '' }} />
+        <Stack.Screen
+          name="SlotSelect"
+          component={SlotSelectScreen}
+          options={{ title: '', headerShown: false }}
+        />
         <Stack.Screen
           name="BookingForm"
           component={BookingFormScreen}
-          options={{ title: '' }}
+          options={{ title: '', headerShown: false }}
         />
         <Stack.Screen
           name="Confirmation"
           component={ConfirmationScreen}
-          options={{ title: 'Done' }}
+          options={{ title: '', headerShown: false }}
         />
         <Stack.Screen
           name="CancelAppointment"
