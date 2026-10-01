@@ -1,6 +1,9 @@
 {
   "name": "terminko-mobile",
+  "description": "Guest mobile app for Terminko, a multi-tenant appointment scheduling platform.",
   "version": "1.0.0",
+  "license": "MIT",
+  "author": "Stefan Rakonjac",
   "main": "index.ts",
   "scripts": {
     "start": "expo start",

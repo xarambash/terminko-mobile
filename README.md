@@ -1,70 +1,138 @@
-# terminko-mobile
+# Terminko Mobile
 
-Guest-facing mobile app for Terminko (Expo, React Native, TypeScript). Owners and staff use **terminko-manager** on the web.
+Guest mobile app for **Terminko**, a multi-tenant appointment scheduling platform
+for small businesses (salons, barbers, dentists). Guests use it to book and
+cancel appointments. Owners and staff use the web dashboard.
 
-## Docs
+There is no public install yet. Run it locally with Expo Go.
 
-| File | Purpose |
-|------|---------|
-| [`agent-rules/context/project-context.md`](./agent-rules/context/project-context.md) | Scope, flows, API notes |
-| [`agent-rules/context/tech-stack.md`](./agent-rules/context/tech-stack.md) | Dependencies and tooling |
-| [`../src/reminders/production-mobile-api-setup.md`](../src/reminders/production-mobile-api-setup.md) | Production API/mobile networking setup (monorepo) |
+> Backed by a Render-hosted API. The API sleeps after 15 minutes of
+> inactivity, so the first request after a pause takes 30 to 60 seconds while
+> the backend wakes up.
 
-## Requirements
+> **Part of the Terminko project:**
+> - 🖥️ [terminko-server](https://github.com/xarambash/terminko-server): REST API
+> - 🌐 [terminko-manager](https://github.com/xarambash/terminko-manager): Web dashboard ([live demo](https://terminko-manager.vercel.app/))
+> - 📱 **terminko-mobile**: Guest app (this repo)
 
-- **Node.js** 18+ (20 LTS recommended; use `nvm use` if you use nvm)
-- **npm** 9+
-- For device builds: Xcode (iOS) / Android Studio (Android), or Expo Go for development
+---
 
-## Setup
+## Screenshots
+
+### Home
+
+![Home](docs/screenshots/home.png)
+
+### Provider
+
+![Provider](docs/screenshots/provider.png)
+
+### Service
+
+![Service](docs/screenshots/service.png)
+
+### Date and time
+
+![Date and time](docs/screenshots/datetime.png)
+
+### Booking overview
+
+![Booking overview](docs/screenshots/overview.png)
+
+### Confirmation
+
+![Confirmation](docs/screenshots/confirmation.png)
+
+---
+
+## Features
+
+- Guest booking flow: provider, service, date and time, details, confirmation
+- No account required. The salon is selected by tenant slug at build time
+- Availability comes from the API, with unavailable days grayed out on the calendar
+- Booking overview shows service, slot, and price before confirm
+- Cancel an appointment with the cancellation code, no login required
+- Salon name on the home screen is loaded from the API
+- English UI through i18next
+
+## Tech stack
+
+| Area           | Choice                                      |
+| -------------- | ------------------------------------------- |
+| Language       | TypeScript 5                                |
+| UI             | React Native 0.81, Expo 54, React Native Paper |
+| Navigation     | React Navigation 7                          |
+| State          | Redux Toolkit                               |
+| HTTP           | axios                                       |
+| Dates          | date-fns, react-native-calendars            |
+| i18n           | i18next, react-i18next                      |
+| Storage        | AsyncStorage                                |
+| Tooling        | ESLint                                      |
+
+## Running locally
 
 ```bash
+git clone https://github.com/xarambash/terminko-mobile.git
 cd terminko-mobile
-npm install
 cp .env.example .env
-# Edit .env — set EXPO_PUBLIC_API_URL to your terminko-server URL (e.g. http://localhost:5000)
+npm install
 npm start
 ```
 
-Then press `i` / `a` for simulator or scan the QR code with Expo Go.
+Then press `i` for the iOS simulator, `a` for Android, or scan the QR code
+with Expo Go.
 
-## Required env vars
+The app expects a running
+[terminko-server](https://github.com/xarambash/terminko-server). On a physical
+phone, `localhost` will not reach your computer. Use the Render URL from
+`.env.example`, or your computer LAN IP.
 
-Set these in `.env`:
+| Script            | What it does                         |
+| ----------------- | ------------------------------------ |
+| `npm start`       | Start the Expo dev server            |
+| `npm run ios`     | Open the iOS simulator               |
+| `npm run android` | Open the Android emulator            |
+| `npm run lint`    | Run ESLint                           |
 
-- `EXPO_PUBLIC_API_URL` - Base URL of `terminko-server` (for phone testing use your computer LAN IP, e.g. `http://192.168.1.37:5000`)
-- `EXPO_PUBLIC_TENANT_SLUG` - Tenant slug used by `GET /tenants/:slug` (e.g. `salon-lepota`)
+### Environment variables
 
-If the app shows a stale error after dependency changes, clear Metro’s cache:
+| Variable                   | Purpose                                      |
+| -------------------------- | -------------------------------------------- |
+| `EXPO_PUBLIC_API_URL`      | Base URL of the terminko-server API          |
+| `EXPO_PUBLIC_TENANT_SLUG`  | Tenant slug the app should load              |
 
-```bash
-npx expo start -c
-```
-
-## Scripts
-
-| Command | Description |
-|---------|-------------|
-| `npm start` | Expo dev server |
-| `npm run ios` | Open iOS simulator |
-| `npm run android` | Open Android emulator |
-| `npm run web` | Web (limited; native is primary) |
-| `npm run lint` | ESLint |
-
-## Project layout
+## Project structure
 
 ```
 src/
-  api/           # Axios instance (EXPO_PUBLIC_API_URL)
-  components/    # Shared UI
-  constants/     # e.g. AsyncStorage keys
-  i18n/            # i18next + locales
-  lib/             # guestId storage helpers
-  navigation/      # Root stack
-  screens/         # Guest flows (placeholders → wire to API)
-  store/           # Redux Toolkit (booking draft state)
+├── api/          # axios calls, one file per domain
+├── components/   # Shared UI and booking step layout
+├── constants/    # Env and booking flow constants
+├── i18n/         # i18next setup
+├── locales/      # Translation files
+├── navigation/   # Root stack
+├── screens/      # Booking and cancel screens
+├── store/        # Redux Toolkit slices and thunks
+├── theme/        # Paper theme and brand tokens
+└── utils/        # Small helpers
 ```
 
-## Backend
+## Notes
 
-Uses the same **terminko-server** REST API as the web app. Guest routes do not require JWT; persist `guestId` after the first booking (see `src/lib/guestStorage.ts`).
+This is a portfolio project. The backend runs on a free Render instance and
+the database holds demo data only. Real user data is not stored.
+
+There is no App Store or Play Store build. The guest flow is the product:
+open the app, pick a provider, and book. Cancellation uses the code from the
+confirmation step.
+
+## What I'd do next
+
+- Serbian locale next to English
+- A public Expo build so the flow can be opened without a local checkout
+- Tests for the booking steps and the cancel-by-code screen
+- Reminder notifications before the appointment
+
+## Author
+
+Stefan Rakonjac, [@xarambash](https://github.com/xarambash)
