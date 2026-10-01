@@ -1,43 +1,25 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Button, Divider, Surface, Text, useTheme } from 'react-native-paper';
 import { format, parseISO } from 'date-fns';
 
-import { BookingOverviewGraphic, type BookingOverviewRow } from '../components/BookingOverviewGraphic';
 import { BookingStepLayout } from '../components/booking-step-layout';
-import { AppText } from '../components/AppText';
-import { AppTextInput } from '../components/AppTextInput';
+import { FormInput } from '../components/FormInput';
 import { bookingStepIndex } from '../constants/bookingFlow';
 import type { RootStackParamList } from '../navigation/types';
 import { submitBooking } from '../store/bookingThunks';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { resetSubmit } from '../store/slices/bookingSlice';
-import { FONT_FAMILY_UI, FONT_FAMILY_UI_BOLD, landingBrand } from '../theme/theme';
 import { EMAIL_REGEX } from '../utils/constants';
 import { formatResourceName } from '../utils/utils';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'BookingForm'>;
 
-const inputText = (fontError: boolean) => ({
-  fontFamily: FONT_FAMILY_UI,
-  fontSize: 20,
-  lineHeight: 24,
-  color: landingBrand.title,
-  borderColor: fontError ? '#c54a3e' : landingBrand.cardBorder,
-  backgroundColor: landingBrand.cardSurface,
-});
-
 export function BookingFormScreen({ navigation }: Props) {
   const { t } = useTranslation();
+  const theme = useTheme();
   const dispatch = useAppDispatch();
 
   const { tenantId, resourceId, serviceId, slotStart, slotEnd, resources, services, submitStatus, submitError } =
@@ -47,25 +29,18 @@ export function BookingFormScreen({ navigation }: Props) {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [notes, setNotes] = useState('');
-  const [fieldErrors, setFieldErrors] = useState<{ name?: string; email?: string; phone?: string }>(
-    {},
-  );
+  const [fieldErrors, setFieldErrors] = useState<{ name?: string; email?: string; phone?: string }>({});
 
   useEffect(() => {
-    if (submitStatus === 'succeeded') {
-      navigation.navigate('Confirmation');
-    }
+    if (submitStatus === 'succeeded') navigation.navigate('Confirmation');
   }, [submitStatus, navigation]);
 
   useEffect(() => {
-    return () => {
-      dispatch(resetSubmit());
-    };
+    return () => { dispatch(resetSubmit()); };
   }, [dispatch]);
 
   const selectedResource = resources.find((r) => r.id === resourceId);
   const resourceName = selectedResource ? formatResourceName(selectedResource) : '';
-
   const selectedService = services.find((s) => s.serviceId === serviceId);
   const serviceName = selectedService?.service.name ?? '';
 
@@ -77,38 +52,18 @@ export function BookingFormScreen({ navigation }: Props) {
 
   const priceDisplay = useMemo(() => {
     const raw = selectedService?.price?.trim();
-    if (!raw) return '—';
-    return `${raw} RSD`;
+    return raw ? `${raw} RSD` : '—';
   }, [selectedService?.price]);
 
   const summaryDate = useMemo(() => {
-    if (!slotStart) return '';
+    if (!slotStart) return '—';
     return format(parseISO(slotStart), 'PPP');
   }, [slotStart]);
 
-  const summaryTimeRange = useMemo(() => {
-    if (!slotStart || !slotEnd) return '';
+  const summaryTime = useMemo(() => {
+    if (!slotStart || !slotEnd) return '—';
     return `${format(parseISO(slotStart), 'HH:mm')} – ${format(parseISO(slotEnd), 'HH:mm')}`;
   }, [slotStart, slotEnd]);
-
-  const overviewRows: BookingOverviewRow[] = useMemo(
-    () => [
-      { label: t('slotSelect.serviceLabel'), value: serviceName || '—' },
-      { label: t('bookingForm.summaryDate'), value: summaryDate || '—' },
-      { label: t('bookingForm.summaryTime'), value: summaryTimeRange || '—' },
-      {
-        label: t('bookingForm.summaryPrice'),
-        value: priceDisplay,
-        valueAccent: 'gold',
-      },
-    ],
-    [t, serviceName, summaryDate, summaryTimeRange, priceDisplay],
-  );
-
-  const overviewRowKey = useMemo(
-    () => overviewRows.map((r) => `${r.label}\u0000${r.value}`).join('|'),
-    [overviewRows],
-  );
 
   const validate = useCallback(() => {
     const errors: { name?: string; email?: string; phone?: string } = {};
@@ -120,9 +75,7 @@ export function BookingFormScreen({ navigation }: Props) {
   }, [name, email, phone, t]);
 
   const onSubmit = useCallback(() => {
-    if (!validate()) return;
-    if (!tenantId || !resourceId || !serviceId || !slotStart || !slotEnd) return;
-
+    if (!validate() || !tenantId || !resourceId || !serviceId || !slotStart || !slotEnd) return;
     void dispatch(
       submitBooking({
         tenantId,
@@ -139,134 +92,124 @@ export function BookingFormScreen({ navigation }: Props) {
         },
       }),
     );
-  }, [
-    validate,
-    dispatch,
-    tenantId,
-    resourceId,
-    serviceId,
-    slotStart,
-    slotEnd,
-    name,
-    email,
-    phone,
-    notes,
-    resourceName,
-    serviceName,
-    priceAtBooking,
-  ]);
+  }, [validate, dispatch, tenantId, resourceId, serviceId, slotStart, slotEnd, name, email, phone, notes, resourceName, serviceName, priceAtBooking]);
 
   const submitting = submitStatus === 'loading';
 
   return (
-    <KeyboardAvoidingView
-      style={styles.flex}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <BookingStepLayout
-        variant="landing"
         activeStep={bookingStepIndex.form}
         onBack={() => navigation.goBack()}
         backAccessibilityLabel={t('screens.back')}
         safeAreaEdges={['top', 'left', 'right', 'bottom']}
-        contentContainerStyle={styles.layoutContent}
         pageTitle={t('bookingForm.bookingOverview')}
+        contentContainerStyle={styles.content}
       >
-        <View style={styles.overviewBlock}>
-          <BookingOverviewGraphic
-            key={overviewRowKey}
-            rows={overviewRows}
-            providerFullName={resourceName}
-          />
-        </View>
+        <Surface style={styles.overviewCard} elevation={1}>
+          <View style={styles.overviewGrid}>
+            <View style={styles.overviewCell}>
+              <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                {t('slotSelect.serviceLabel').toUpperCase()}
+              </Text>
+              <Text variant="titleSmall" numberOfLines={2}>{serviceName || '—'}</Text>
+            </View>
+            <View style={styles.overviewCell}>
+              <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                {t('bookingForm.summaryDate').toUpperCase()}
+              </Text>
+              <Text variant="titleSmall" numberOfLines={2}>{summaryDate}</Text>
+            </View>
+          </View>
+          <Divider style={styles.overviewDivider} />
+          <View style={styles.overviewGrid}>
+            <View style={styles.overviewCell}>
+              <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                {t('bookingForm.summaryTime').toUpperCase()}
+              </Text>
+              <Text variant="titleSmall">{summaryTime}</Text>
+            </View>
+            <View style={styles.overviewCell}>
+              <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                {t('bookingForm.summaryPrice').toUpperCase()}
+              </Text>
+              <Text variant="titleSmall" style={{ color: theme.colors.primary }}>{priceDisplay}</Text>
+            </View>
+          </View>
+        </Surface>
 
-        <Text style={styles.yourDetailsHeading}>{t('bookingForm.yourDetails')}</Text>
+        <Text variant="labelMedium" style={[styles.sectionLabel, { color: theme.colors.onSurfaceVariant }]}>
+          {t('bookingForm.yourDetails').toUpperCase()}
+        </Text>
 
         <View style={styles.form}>
-          <AppTextInput
-            style={[styles.input, inputText(!!fieldErrors.name)]}
-            placeholderTextColor={landingBrand.metaLabel}
-            accessibilityLabel={t('bookingForm.name')}
-            placeholder={t('bookingForm.name')}
+          <FormInput
+            label={t('bookingForm.name')}
             value={name}
             onChangeText={setName}
+            error={!!fieldErrors.name}
+            errorText={fieldErrors.name}
             autoCapitalize="words"
             autoComplete="name"
             returnKeyType="next"
           />
-          {fieldErrors.name ? <Text style={styles.fieldError}>{fieldErrors.name}</Text> : null}
-
-          <AppTextInput
-            style={[styles.input, inputText(!!fieldErrors.email)]}
-            placeholderTextColor={landingBrand.metaLabel}
-            accessibilityLabel={t('bookingForm.email')}
-            placeholder={t('bookingForm.email')}
+          <FormInput
+            label={t('bookingForm.email')}
             value={email}
             onChangeText={setEmail}
+            error={!!fieldErrors.email}
+            errorText={fieldErrors.email}
             keyboardType="email-address"
             autoCapitalize="none"
             autoComplete="email"
             returnKeyType="next"
           />
-          {fieldErrors.email ? <Text style={styles.fieldError}>{fieldErrors.email}</Text> : null}
-
-          <AppTextInput
-            style={[styles.input, inputText(!!fieldErrors.phone)]}
-            placeholderTextColor={landingBrand.metaLabel}
-            accessibilityLabel={t('bookingForm.phone')}
-            placeholder={t('bookingForm.phone')}
+          <FormInput
+            label={t('bookingForm.phone')}
             value={phone}
             onChangeText={setPhone}
+            error={!!fieldErrors.phone}
+            errorText={fieldErrors.phone}
             keyboardType="phone-pad"
             autoComplete="tel"
             returnKeyType="next"
           />
-          {fieldErrors.phone ? <Text style={styles.fieldError}>{fieldErrors.phone}</Text> : null}
-
-          <AppTextInput
-            style={[styles.input, styles.notesInput, inputText(false)]}
-            placeholderTextColor={landingBrand.metaLabel}
-            accessibilityLabel={t('bookingForm.notes')}
-            placeholder={t('bookingForm.notes')}
+          <FormInput
+            label={t('bookingForm.notes')}
             value={notes}
             onChangeText={setNotes}
             multiline
             numberOfLines={2}
             returnKeyType="done"
           />
+        </View>
 
+        <View style={styles.footer}>
           {submitStatus === 'failed' && submitError ? (
-            <View style={styles.errorBox}>
-              <AppText style={styles.errorTitle}>{t('bookingForm.errorTitle')}</AppText>
-              <Text style={styles.errorBody}>
+            <Surface style={[styles.errorBox, { borderColor: theme.colors.errorContainer }]} elevation={0}>
+              <Text variant="labelMedium" style={{ color: theme.colors.error }}>
+                {t('bookingForm.errorTitle')}
+              </Text>
+              <Text variant="bodySmall" style={{ color: theme.colors.error }}>
                 {submitError === 'network' ? t('bookingForm.errorNetwork') : submitError}
               </Text>
-            </View>
+            </Surface>
           ) : null}
 
-          <Text style={styles.hint} maxFontSizeMultiplier={1.2}>
+          <Text variant="bodySmall" style={[styles.hint, { color: theme.colors.onSurfaceVariant }]}>
             {t('bookingForm.afterSubmitHint')}
           </Text>
 
-          {submitting ? (
-            <View style={[styles.submitBtn, styles.submittingInner]}>
-              <ActivityIndicator color={landingBrand.background} size="small" />
-              <Text style={styles.submittingText}>{t('bookingForm.submitting')}</Text>
-            </View>
-          ) : (
-            <Pressable
-              accessibilityRole="button"
-              onPress={onSubmit}
-              style={({ pressed }) => [styles.submitBtn, pressed && { opacity: 0.92 }]}
-            >
-              <Text style={styles.checkGlyph} maxFontSizeMultiplier={1.2}>
-                ✓
-              </Text>
-              <Text style={styles.submitLabel} numberOfLines={1}>
-                {t('bookingForm.submit')}
-              </Text>
-            </Pressable>
-          )}
+          <Button
+            mode="contained"
+            onPress={onSubmit}
+            loading={submitting}
+            disabled={submitting}
+            style={styles.submitBtn}
+            contentStyle={styles.submitBtnContent}
+          >
+            {submitting ? t('bookingForm.submitting') : t('bookingForm.submit')}
+          </Button>
         </View>
       </BookingStepLayout>
     </KeyboardAvoidingView>
@@ -275,74 +218,51 @@ export function BookingFormScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  layoutContent: { paddingTop: 0 },
-  overviewBlock: {
-    alignSelf: 'stretch',
-    marginBottom: 0,
+  content: {
+    flexGrow: 1,
   },
-  yourDetailsHeading: {
-    fontFamily: FONT_FAMILY_UI,
-    fontSize: 16,
-    lineHeight: 22,
-    letterSpacing: 0.4,
-    color: landingBrand.metaLabel,
-    textTransform: 'none',
-    marginTop: 0,
-    marginBottom: 12,
-  },
-  form: { gap: 12 },
-  input: {
-    borderWidth: 1.5,
+  overviewCard: {
     borderRadius: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginBottom: 16,
   },
-  notesInput: { minHeight: 80, textAlignVertical: 'top', paddingTop: 12 },
-  fieldError: {
-    fontFamily: FONT_FAMILY_UI,
-    fontSize: 14,
-    color: '#e8a598',
-    marginTop: -4,
-  },
-  errorBox: {
-    borderRadius: 10,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#5c2c28',
-    backgroundColor: 'rgba(0,0,0,0.25)',
-  },
-  errorTitle: { fontWeight: '600', marginBottom: 4, color: '#e8a598', fontSize: 15 },
-  errorBody: { fontFamily: FONT_FAMILY_UI, fontSize: 14, color: '#e8a598' },
-  hint: {
-    fontFamily: FONT_FAMILY_UI,
-    fontSize: 16,
-    lineHeight: 22,
-    textAlign: 'center',
-    color: landingBrand.metaLabel,
-    marginTop: 4,
-  },
-  submitBtn: {
-    marginTop: 4,
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    backgroundColor: landingBrand.primaryFill,
-    alignItems: 'center',
-    justifyContent: 'center',
+  overviewGrid: {
     flexDirection: 'row',
+    gap: 12,
+  },
+  overviewCell: {
+    flex: 1,
+    gap: 2,
+    paddingVertical: 6,
+  },
+  overviewDivider: {
+    marginVertical: 4,
+  },
+  sectionLabel: {
+    marginBottom: 8,
+  },
+  form: {
     gap: 8,
   },
-  submittingInner: { flexDirection: 'row', gap: 8 },
-  submittingText: { fontFamily: FONT_FAMILY_UI, fontSize: 20, color: landingBrand.background },
-  checkGlyph: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: landingBrand.background,
+  footer: {
+    marginTop: 'auto',
+    paddingTop: 16,
+    gap: 8,
   },
-  submitLabel: {
-    fontFamily: FONT_FAMILY_UI_BOLD,
-    fontSize: 22,
-    color: landingBrand.background,
+  errorBox: {
+    borderRadius: 8,
+    padding: 12,
+    borderWidth: 1,
+    gap: 4,
+  },
+  hint: {
     textAlign: 'center',
+  },
+  submitBtn: {
+    borderRadius: 12,
+  },
+  submitBtnContent: {
+    paddingVertical: 4,
   },
 });

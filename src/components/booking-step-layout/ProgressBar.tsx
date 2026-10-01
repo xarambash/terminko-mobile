@@ -1,19 +1,14 @@
 import { StyleSheet, View } from 'react-native';
+import { useTheme } from 'react-native-paper';
 
 import { BOOKING_FLOW_STEPS } from '../../constants/bookingFlow';
-import { landingBrand, type AppTheme } from '../../theme/theme';
-import type { BookingLayoutVariant } from './types';
 
 type Props = {
   activeIndex: number;
-  variant: BookingLayoutVariant;
-  appTheme: AppTheme;
 };
 
-export function ProgressBar({ activeIndex, variant, appTheme }: Props) {
-  const track =
-    variant === 'landing' ? landingBrand.progressTrack : appTheme.colors.contrast;
-  const active = variant === 'landing' ? landingBrand.progressActive : appTheme.colors.text;
+export function ProgressBar({ activeIndex }: Props) {
+  const theme = useTheme();
 
   return (
     <View style={styles.progressRow}>
@@ -22,7 +17,7 @@ export function ProgressBar({ activeIndex, variant, appTheme }: Props) {
           key={i}
           style={[
             styles.progressSegment,
-            { backgroundColor: i <= activeIndex ? active : track },
+            { backgroundColor: i <= activeIndex ? theme.colors.primary : theme.colors.surfaceVariant },
           ]}
         />
       ))}

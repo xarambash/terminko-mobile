@@ -1,21 +1,18 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { ActivityIndicator, Button, Surface, Text, useTheme } from 'react-native-paper';
 import { format, parseISO } from 'date-fns';
 import { Calendar } from 'react-native-calendars';
 
 import { BookingStepLayout } from '../components/booking-step-layout';
+import { TimeSlotGrid, type TimeSlotItem } from '../components/TimeSlotGrid';
 import { bookingStepIndex } from '../constants/bookingFlow';
 import type { RootStackParamList } from '../navigation/types';
 import { fetchSlots } from '../store/bookingThunks';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setSelectedDate, setSelectedSlot } from '../store/slices/bookingSlice';
-import {
-  FONT_FAMILY_UI,
-  FONT_FAMILY_UI_BOLD,
-  landingBrand,
-} from '../theme/theme';
 import { formatResourceName } from '../utils/utils';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SlotSelect'>;
@@ -35,90 +32,29 @@ function ProviderServiceCard({
   providerLabel: string;
   serviceLabel: string;
 }) {
+  const theme = useTheme();
   return (
-    <View style={summaryStyles.card}>
-      <View style={summaryStyles.col}>
-        <Text style={summaryStyles.label} numberOfLines={1}>
+    <Surface style={styles.summaryCard} elevation={1}>
+      <View style={styles.summaryCol}>
+        <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
           {providerLabel}
         </Text>
-        <Text style={summaryStyles.value} numberOfLines={2}>
-          {providerName}
-        </Text>
+        <Text variant="titleSmall" numberOfLines={2}>{providerName}</Text>
       </View>
-      <View style={summaryStyles.divider} />
-      <View style={summaryStyles.col}>
-        <Text style={summaryStyles.label} numberOfLines={1}>
+      <View style={[styles.summaryDivider, { backgroundColor: theme.colors.outline }]} />
+      <View style={styles.summaryCol}>
+        <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
           {serviceLabel}
         </Text>
-        <Text style={summaryStyles.value} numberOfLines={2}>
-          {serviceName}
-        </Text>
+        <Text variant="titleSmall" numberOfLines={2}>{serviceName}</Text>
       </View>
-    </View>
+    </Surface>
   );
 }
-
-const summaryStyles = StyleSheet.create({
-  card: {
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    backgroundColor: landingBrand.cardSurface,
-    borderWidth: 1,
-    borderColor: landingBrand.cardBorder,
-    borderRadius: 16,
-    paddingVertical: 14,
-    paddingHorizontal: 12,
-    marginBottom: 16,
-    minHeight: 86,
-  },
-  col: { flex: 1, paddingHorizontal: 4 },
-  divider: {
-    width: StyleSheet.hairlineWidth,
-    backgroundColor: landingBrand.cardBorder,
-    marginHorizontal: 4,
-  },
-  label: {
-    fontFamily: FONT_FAMILY_UI_BOLD,
-    fontSize: 17,
-    lineHeight: 20,
-    color: landingBrand.metaLabel,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 2,
-  },
-  value: {
-    fontFamily: FONT_FAMILY_UI,
-    fontSize: 20,
-    lineHeight: 24,
-    color: landingBrand.title,
-  },
-});
-
-function GoldRetryButton({ label, onPress }: { label: string; onPress: () => void }) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onPress}
-      style={({ pressed }) => [retryStyles.btn, pressed && { opacity: 0.9 }]}
-    >
-      <Text style={retryStyles.text}>{label}</Text>
-    </Pressable>
-  );
-}
-
-const retryStyles = StyleSheet.create({
-  btn: {
-    alignSelf: 'center',
-    backgroundColor: landingBrand.primaryFill,
-    paddingVertical: 14,
-    paddingHorizontal: 24,
-    borderRadius: 12,
-  },
-  text: { fontFamily: FONT_FAMILY_UI, fontSize: 20, color: landingBrand.primaryLabel },
-});
 
 export function SlotSelectScreen({ navigation }: Props) {
   const { t } = useTranslation();
+  const theme = useTheme();
   const dispatch = useAppDispatch();
   const { tenantId, resourceId, serviceId, resources, services, selectedDate, slots, slotsStatus, slotsError } =
     useAppSelector((s) => s.booking);
@@ -135,16 +71,13 @@ export function SlotSelectScreen({ navigation }: Props) {
   }, [resourceId, serviceId, resources, services]);
 
   useEffect(() => {
-    setPendingSlot(null);
-  }, [selectedDate]);
-
-  useEffect(() => {
     if (!tenantId || !resourceId || !serviceId || !selectedDate || slotsStatus !== 'idle') return;
     void dispatch(fetchSlots({ tenantId, resourceId, serviceId, date: selectedDate }));
   }, [dispatch, tenantId, resourceId, serviceId, selectedDate, slotsStatus]);
 
   const onDayPress = useCallback(
     (day: { dateString: string }) => {
+      setPendingSlot(null);
       dispatch(setSelectedDate(day.dateString));
     },
     [dispatch],
@@ -169,47 +102,53 @@ export function SlotSelectScreen({ navigation }: Props) {
 
   const calendarMarked = useMemo(() => {
     const m: Record<string, object> = {};
-    if (selectedDate) {
-      m[selectedDate] = {
-        selected: true,
-        selectedColor: landingBrand.progressActive,
-        selectedTextColor: landingBrand.background,
+    if (today !== selectedDate) {
+      m[today] = {
+        customStyles: {
+          container: {
+            borderWidth: 1.5,
+            borderColor: theme.colors.primary,
+            borderRadius: 18,
+          },
+          text: {
+            color: theme.colors.primary,
+            fontWeight: '600',
+          },
+        },
       };
     }
-    if (selectedDate && selectedDate !== today) {
-      m[today] = { marked: true, dotColor: landingBrand.progressActive };
-    }
-    if (!selectedDate) {
-      m[today] = { marked: true, dotColor: landingBrand.progressActive };
+    if (selectedDate) {
+      m[selectedDate] = {
+        customStyles: {
+          container: {
+            backgroundColor: theme.colors.primary,
+            borderRadius: 18,
+          },
+          text: {
+            color: theme.colors.onPrimary,
+            fontWeight: '600',
+          },
+        },
+      };
     }
     return m;
-  }, [selectedDate, today]);
+  }, [selectedDate, today, theme]);
 
-  const calendarTheme = useMemo(
-    () => ({
-      backgroundColor: landingBrand.cardSurface,
-      calendarBackground: landingBrand.cardSurface,
-      dayTextColor: landingBrand.metaLabel,
-      textDisabledColor: '#4a4038',
-      textSectionTitleColor: landingBrand.metaLabel,
-      textSectionTitleDisabledColor: '#3a3330',
-      textMonthFontFamily: FONT_FAMILY_UI,
-      textDayFontFamily: FONT_FAMILY_UI,
-      textDayHeaderFontFamily: FONT_FAMILY_UI_BOLD,
-      textMonthFontSize: 25,
-      textMonthFontWeight: '400' as const,
-      monthTextColor: landingBrand.title,
-      arrowColor: landingBrand.title,
-      selectedDayTextColor: landingBrand.background,
-      selectedDayBackgroundColor: landingBrand.progressActive,
-      todayTextColor: landingBrand.title,
-      todayButtonTextColor: landingBrand.title,
-      textDayHeaderFontSize: 14,
-      textDayHeaderFontWeight: '700' as const,
-      textDayFontSize: 18,
-    }),
-    [],
-  );
+  const calendarTheme = useMemo(() => ({
+    backgroundColor: 'transparent',
+    calendarBackground: 'transparent',
+    dayTextColor: theme.colors.onBackground,
+    textDisabledColor: theme.colors.onSurfaceVariant,
+    textSectionTitleColor: theme.colors.onSurfaceVariant,
+    monthTextColor: theme.colors.onBackground,
+    arrowColor: theme.colors.primary,
+    selectedDayTextColor: theme.colors.onPrimary,
+    selectedDayBackgroundColor: theme.colors.primary,
+    todayTextColor: theme.colors.primary,
+    textDayFontSize: 14,
+    textMonthFontSize: 16,
+    textDayHeaderFontSize: 12,
+  }), [theme]);
 
   const slotsFailed = slotsStatus === 'failed' && slotsError;
   const showSlots = slotsStatus === 'succeeded' && !slotsFailed;
@@ -222,189 +161,132 @@ export function SlotSelectScreen({ navigation }: Props) {
       <ProviderServiceCard
         providerName={resourceSummaryName}
         serviceName={serviceSummaryName}
-        providerLabel={t('serviceSelect.providerLabel').toLocaleUpperCase()}
-        serviceLabel={t('slotSelect.serviceLabel').toLocaleUpperCase()}
+        providerLabel={t('serviceSelect.providerLabel').toUpperCase()}
+        serviceLabel={t('slotSelect.serviceLabel').toUpperCase()}
       />
     ) : null;
 
   return (
     <BookingStepLayout
-      variant="landing"
       activeStep={bookingStepIndex.slot}
       onBack={() => navigation.goBack()}
       backAccessibilityLabel={t('screens.back')}
       pageTitle={t('screens.slotSelect')}
       summary={summary}
     >
-      <View
-        style={[
-          styles.calendarShell,
-          Platform.OS === 'ios'
-            ? { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 10 }
-            : { elevation: 4 },
-        ]}
-      >
-        <Calendar
-          onDayPress={onDayPress}
-          markedDates={calendarMarked}
-          minDate={today}
-          firstDay={0}
-          theme={calendarTheme}
-          hideExtraDays
-        />
-      </View>
+      <Calendar
+        onDayPress={onDayPress}
+        markedDates={calendarMarked}
+        markingType="custom"
+        minDate={today}
+        firstDay={0}
+        theme={calendarTheme}
+        hideExtraDays
+      />
 
       {!selectedDate && (
-        <Text style={styles.hint} maxFontSizeMultiplier={1.3}>
+        <Text
+          variant="bodyMedium"
+          style={[styles.hint, { color: theme.colors.onSurfaceVariant }]}
+        >
           {t('slotSelect.pickDate')}
         </Text>
       )}
 
       {selectedDate && (
         <View style={styles.slotsPanel}>
-          <Text style={styles.availableLabel} maxFontSizeMultiplier={1.2}>
-            {t('slotSelect.availableTimesLabel').toLocaleUpperCase()}
+          <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant, marginBottom: 4 }}>
+            {t('slotSelect.availableTimesLabel').toUpperCase()}
           </Text>
 
           {slotsBusy ? (
             <View style={styles.slotsPanelCenter}>
-              <ActivityIndicator size="large" color={landingBrand.progressActive} />
+              <ActivityIndicator size="small" />
             </View>
           ) : slotsFailed ? (
-            <View style={styles.slotsPanelMessage}>
-              <Text style={styles.errorText} maxFontSizeMultiplier={1.2}>
+            <View style={styles.slotsPanelCenter}>
+              <Text variant="bodySmall" style={{ color: theme.colors.error, marginBottom: 8 }}>
                 {t('slotSelect.slotsError')}
               </Text>
-              <GoldRetryButton label={t('slotSelect.retry')} onPress={onRetry} />
+              <Button mode="contained" onPress={onRetry} compact>
+                {t('slotSelect.retry')}
+              </Button>
             </View>
           ) : showSlots && slots.length === 0 ? (
             <View style={styles.slotsPanelCenter}>
-              <Text style={styles.hint} maxFontSizeMultiplier={1.2}>
+              <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
                 {t('slotSelect.noSlots')}
               </Text>
             </View>
           ) : showSlots && slots.length > 0 ? (
-            <View style={styles.slotsGrid}>
-              {slots.map((slot, index) => {
-                const label = `${formatSlotTime(slot.startAt)} – ${formatSlotTime(slot.endAt)}`;
-                const isSelected = pendingSlot?.startAt === slot.startAt && pendingSlot?.endAt === slot.endAt;
-                return (
-                  <Pressable
-                    key={`${slot.startAt}-${slot.endAt}-${index}`}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected: isSelected }}
-                    accessibilityLabel={t('slotSelect.chooseSlotA11y', { time: label })}
-                    onPress={() => onSelectSlot(slot.startAt, slot.endAt)}
-                    style={({ pressed }) => [
-                      styles.slotChip,
-                      isSelected ? styles.slotChipSelected : styles.slotChipIdle,
-                      pressed && { opacity: 0.9 },
-                    ]}
-                  >
-                    <Text
-                      style={[styles.slotText, isSelected ? styles.slotTextSelected : styles.slotTextIdle]}
-                      numberOfLines={1}
-                    >
-                      {label}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
+            <TimeSlotGrid
+              slots={slots.map<TimeSlotItem>((slot) => ({
+                startAt: slot.startAt,
+                endAt: slot.endAt,
+                label: `${formatSlotTime(slot.startAt)} – ${formatSlotTime(slot.endAt)}`,
+              }))}
+              selectedStartAt={pendingSlot?.startAt ?? null}
+              selectedEndAt={pendingSlot?.endAt ?? null}
+              onSelect={onSelectSlot}
+              getAccessibilityLabel={(time) => t('slotSelect.chooseSlotA11y', { time })}
+            />
           ) : null}
         </View>
       )}
 
       {selectedDate && showSlots && slots.length > 0 && (
-        <Pressable
-          accessibilityRole="button"
-          disabled={!pendingSlot}
+        <Button
+          mode="contained"
           onPress={onContinue}
-          style={({ pressed }) => [
-            styles.continueBtn,
-            !pendingSlot && styles.continueDisabled,
-            pressed && pendingSlot && { opacity: 0.92 },
-          ]}
+          disabled={!pendingSlot}
+          style={styles.continueBtn}
+          contentStyle={styles.continueBtnContent}
         >
-          <Text style={styles.continueLabel} maxFontSizeMultiplier={1.2}>
-            {t('slotSelect.continue')}
-          </Text>
-        </Pressable>
+          {t('slotSelect.continue')}
+        </Button>
       )}
     </BookingStepLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  calendarShell: {
-    borderRadius: 16,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: landingBrand.cardBorder,
-    backgroundColor: landingBrand.cardSurface,
+  hint: {
+    textAlign: 'center',
+    marginTop: 12,
     marginBottom: 8,
   },
-  hint: {
-    marginTop: 12,
-    fontSize: 18,
-    fontFamily: FONT_FAMILY_UI,
-    textAlign: 'center',
-    marginVertical: 12,
-    color: landingBrand.subtitle,
+  slotsPanel: {
+    marginTop: 6,
+    marginBottom: 4,
+    minHeight: 80,
   },
-  errorText: {
-    marginBottom: 12,
-    fontSize: 16,
-    fontFamily: FONT_FAMILY_UI,
-    textAlign: 'center',
-    color: '#e8a598',
+  slotsPanelCenter: {
+    minHeight: 80,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  availableLabel: {
-    fontFamily: FONT_FAMILY_UI_BOLD,
-    fontSize: 11,
-    lineHeight: 14,
-    letterSpacing: 0.8,
-    color: landingBrand.metaLabel,
-    textTransform: 'uppercase',
-    marginBottom: 10,
+  continueBtn: {
+    marginTop: 8,
+    borderRadius: 32,
   },
-  slotsPanel: { marginTop: 8, marginBottom: 8, minHeight: 120 },
-  slotsPanelCenter: { minHeight: 120, justifyContent: 'center', alignItems: 'center' },
-  slotsPanelMessage: { minHeight: 120, paddingHorizontal: 8, alignItems: 'center', justifyContent: 'center' },
-  slotsGrid: {
+  continueBtnContent: {
+    paddingVertical: 2,
+  },
+  summaryCard: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    alignItems: 'stretch',
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    marginBottom: 8,
     gap: 8,
   },
-  slotChip: {
-    width: '31%',
-    minWidth: 100,
-    flexGrow: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 4,
-    borderRadius: 8,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+  summaryCol: {
+    flex: 1,
+    gap: 2,
   },
-  slotChipIdle: {
-    backgroundColor: landingBrand.cardSurface,
-    borderColor: landingBrand.cardBorder,
+  summaryDivider: {
+    width: StyleSheet.hairlineWidth,
+    marginHorizontal: 4,
   },
-  slotChipSelected: {
-    backgroundColor: 'transparent',
-    borderColor: landingBrand.progressActive,
-  },
-  slotText: { fontSize: 12, fontFamily: FONT_FAMILY_UI, textAlign: 'center' },
-  slotTextIdle: { color: landingBrand.subtitle },
-  slotTextSelected: { color: landingBrand.progressActive, fontWeight: '600' },
-  continueBtn: {
-    marginTop: 20,
-    paddingVertical: 16,
-    borderRadius: 32,
-    backgroundColor: landingBrand.primaryFill,
-    alignItems: 'center',
-  },
-  continueDisabled: { opacity: 0.4 },
-  continueLabel: { fontFamily: FONT_FAMILY_UI_BOLD, fontSize: 22, color: landingBrand.background },
 });

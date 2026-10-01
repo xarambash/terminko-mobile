@@ -1,1 +1,1 @@
-export { BookingStepLayout, type BookingLayoutVariant, type ShellMode } from './BookingStepLayout';
+export { BookingStepLayout, type ShellMode } from './BookingStepLayout';

@@ -1,39 +1,37 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useMemo } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { ActivityIndicator, Button, Card, Surface, Text, useTheme } from 'react-native-paper';
 
 import { BookingStepLayout } from '../components/booking-step-layout';
-import { PrimaryButton } from '../components/PrimaryButton';
 import { bookingStepIndex } from '../constants/bookingFlow';
 import type { RootStackParamList } from '../navigation/types';
 import { fetchServices } from '../store/bookingThunks';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { pickService } from '../store/slices/bookingSlice';
-import { FONT_FAMILY_UI, FONT_FAMILY_UI_BOLD, landingBrand } from '../theme/theme';
 import { formatResourceName } from '../utils/utils';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ServiceSelect'>;
 
 function ProviderSummaryCard({ label, providerName }: { label: string; providerName: string }) {
+  const theme = useTheme();
   return (
-    <View style={styles.providerCard}>
-      <Text style={styles.providerLabel} maxFontSizeMultiplier={1.35}>
-        {label}
+    <Surface style={styles.providerCard} elevation={1}>
+      <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
+        {label.toUpperCase()}
       </Text>
-      <Text style={styles.providerName} numberOfLines={2} maxFontSizeMultiplier={1.35}>
-        {providerName}
-      </Text>
-    </View>
+      <Text variant="titleMedium">{providerName}</Text>
+    </Surface>
   );
 }
 
 export function ServiceSelectScreen({ navigation }: Props) {
   const { t } = useTranslation();
+  const theme = useTheme();
   const dispatch = useAppDispatch();
-  const { tenantId, resourceId, resources, services, servicesStatus, servicesError } = useAppSelector(
-    (s) => s.booking,
-  );
+  const { tenantId, resourceId, resources, services, servicesStatus, servicesError } =
+    useAppSelector((s) => s.booking);
 
   const selectedResourceName = useMemo(() => {
     if (!resourceId) return null;
@@ -62,39 +60,42 @@ export function ServiceSelectScreen({ navigation }: Props) {
   const loading = servicesStatus === 'loading';
   const failed = servicesStatus === 'failed' && servicesError;
   const showList = servicesStatus === 'succeeded' && !failed;
-  const contentContainerStyle = loading ? styles.scrollContentLoading : undefined;
 
   return (
     <BookingStepLayout
-      variant="landing"
       activeStep={bookingStepIndex.service}
       onBack={() => navigation.goBack()}
       backAccessibilityLabel={t('screens.back')}
       pageTitle={t('screens.serviceSelect')}
-      contentContainerStyle={contentContainerStyle}
+      contentContainerStyle={loading ? styles.centered : undefined}
       summary={
         !loading && selectedResourceName ? (
-          <ProviderSummaryCard label={t('serviceSelect.providerLabel')} providerName={selectedResourceName} />
+          <ProviderSummaryCard
+            label={t('serviceSelect.providerLabel')}
+            providerName={selectedResourceName}
+          />
         ) : null
       }
     >
       {loading && (
-        <View style={styles.fullScreenCenter}>
-          <ActivityIndicator size="large" color={landingBrand.progressActive} />
+        <View style={styles.loaderWrap}>
+          <ActivityIndicator size="large" />
         </View>
       )}
 
       {!loading && failed && (
         <View style={styles.block}>
-          <Text style={styles.errorTextOnDark} maxFontSizeMultiplier={1.35}>
+          <Text variant="bodyMedium" style={[styles.errorText, { color: theme.colors.error }]}>
             {t('serviceSelect.error')}
           </Text>
-          <PrimaryButton onPress={onRetry}>{t('serviceSelect.retry')}</PrimaryButton>
+          <Button mode="contained" onPress={onRetry} style={styles.retryBtn}>
+            {t('serviceSelect.retry')}
+          </Button>
         </View>
       )}
 
       {!loading && showList && services.length === 0 && (
-        <Text style={styles.hint} maxFontSizeMultiplier={1.35}>
+        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
           {t('serviceSelect.emptyList')}
         </Text>
       )}
@@ -103,86 +104,70 @@ export function ServiceSelectScreen({ navigation }: Props) {
         showList &&
         services.length > 0 &&
         services.map((item) => (
-          <Pressable
+          <Card
             key={item.id}
-            accessibilityRole="button"
-            accessibilityLabel={t('serviceSelect.chooseServiceA11y', {
-              name: item.service.name,
-            })}
+            mode="outlined"
+            style={styles.card}
             onPress={() => onSelectService(item.serviceId)}
-            style={({ pressed }) => [styles.serviceRow, pressed && styles.pressed]}
+            accessibilityLabel={t('serviceSelect.chooseServiceA11y', { name: item.service.name })}
           >
-            <View style={styles.rowContent}>
-              <Text style={styles.serviceName} numberOfLines={2} maxFontSizeMultiplier={1.25}>
-                {item.service.name}
-              </Text>
-              <Text style={styles.servicePrice} maxFontSizeMultiplier={1.25}>
-                {item.price}
-              </Text>
+            <View style={styles.cardInner}>
+              <View style={styles.rowContent}>
+                <Text variant="titleMedium" style={styles.serviceName} numberOfLines={2}>
+                  {item.service.name}
+                </Text>
+                <Text variant="titleMedium" style={{ color: theme.colors.primary }}>
+                  {item.price}
+                </Text>
+              </View>
+              {item.service.description ? (
+                <Text
+                  variant="bodySmall"
+                  style={{ color: theme.colors.onSurfaceVariant, marginTop: 4 }}
+                >
+                  {item.service.description}
+                </Text>
+              ) : null}
             </View>
-            {item.service.description ? (
-              <Text style={styles.rowDesc} maxFontSizeMultiplier={1.25}>
-                {item.service.description}
-              </Text>
-            ) : null}
-          </Pressable>
+          </Card>
         ))}
     </BookingStepLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollContentLoading: { flexGrow: 1, justifyContent: 'center' },
-  fullScreenCenter: { alignItems: 'center', justifyContent: 'center', flexGrow: 1 },
+  centered: {
+    flexGrow: 1,
+    justifyContent: 'center',
+  },
+  loaderWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexGrow: 1,
+  },
   providerCard: {
-    alignSelf: 'stretch',
-    backgroundColor: landingBrand.cardSurface,
-    borderWidth: 1,
-    borderColor: landingBrand.cardBorder,
-    borderRadius: 16,
-    paddingVertical: 14,
+    borderRadius: 12,
+    paddingVertical: 12,
     paddingHorizontal: 16,
     marginBottom: 16,
+    gap: 2,
   },
-  providerLabel: {
-    fontFamily: FONT_FAMILY_UI_BOLD,
-    fontSize: 17,
-    lineHeight: 20,
-    color: landingBrand.metaLabel,
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
-    marginBottom: 2,
+  block: {
+    marginBottom: 8,
   },
-  providerName: {
-    fontFamily: FONT_FAMILY_UI,
-    fontSize: 20,
-    lineHeight: 24,
-    color: landingBrand.title,
-  },
-  hint: {
-    marginTop: 12,
-    fontSize: 18,
-    fontFamily: FONT_FAMILY_UI,
-    color: landingBrand.subtitle,
-  },
-  errorTextOnDark: {
-    fontFamily: FONT_FAMILY_UI,
-    fontSize: 18,
-    color: '#e8a598',
+  errorText: {
     marginBottom: 12,
   },
-  block: { marginBottom: 8 },
-  serviceRow: {
-    alignSelf: 'stretch',
-    backgroundColor: landingBrand.cardSurface,
-    borderWidth: 1,
-    borderColor: landingBrand.cardBorder,
-    borderRadius: 16,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
+  retryBtn: {
+    alignSelf: 'flex-start',
+  },
+  card: {
     marginBottom: 10,
   },
-  pressed: { opacity: 0.88 },
+  cardInner: {
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+  },
   rowContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -191,22 +176,5 @@ const styles = StyleSheet.create({
   },
   serviceName: {
     flex: 1,
-    fontFamily: FONT_FAMILY_UI,
-    fontSize: 22,
-    lineHeight: 26,
-    color: landingBrand.title,
-  },
-  servicePrice: {
-    fontFamily: FONT_FAMILY_UI,
-    fontSize: 20,
-    lineHeight: 24,
-    color: landingBrand.initialsGold,
-  },
-  rowDesc: {
-    fontSize: 14,
-    lineHeight: 18,
-    marginTop: 8,
-    fontFamily: FONT_FAMILY_UI,
-    color: landingBrand.subtitle,
   },
 });
