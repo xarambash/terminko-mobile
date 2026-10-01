@@ -6,6 +6,7 @@ import { ActivityIndicator, Avatar, Button, Card, Icon, Text, useTheme } from 'r
 
 import type { Resource } from '../api/types';
 import { BookingStepLayout } from '../components/booking-step-layout';
+import { PrimaryButton } from '../components/PrimaryButton';
 import { TENANT_SLUG } from '../constants/env';
 import { bookingStepIndex } from '../constants/bookingFlow';
 import type { RootStackParamList } from '../navigation/types';
@@ -29,7 +30,7 @@ export function ResourceSelectScreen({ navigation }: Props) {
   const { t } = useTranslation();
   const theme = useTheme();
   const dispatch = useAppDispatch();
-  const { tenantId, tenantStatus, tenantErrorCode, resources, resourcesStatus, resourcesError } =
+  const { tenantId, tenantStatus, tenantErrorCode, resourceId, resources, resourcesStatus, resourcesError } =
     useAppSelector((s) => s.booking);
 
   useEffect(() => {
@@ -55,10 +56,14 @@ export function ResourceSelectScreen({ navigation }: Props) {
   const onSelectResource = useCallback(
     (id: string) => {
       dispatch(pickResource(id));
-      navigation.navigate('ServiceSelect');
     },
-    [dispatch, navigation],
+    [dispatch],
   );
+
+  const onContinue = useCallback(() => {
+    if (!resourceId) return;
+    navigation.navigate('ServiceSelect');
+  }, [resourceId, navigation]);
 
   const loading =
     tenantStatus === 'loading' || (tenantStatus === 'succeeded' && resourcesStatus === 'loading');
@@ -77,7 +82,7 @@ export function ResourceSelectScreen({ navigation }: Props) {
       pageTitle={shellMode === 'full' ? t('resourceSelect.title') : undefined}
       shellMode={shellMode}
       safeAreaEdges={['top', 'left', 'right', 'bottom']}
-      contentContainerStyle={showFullScreenLoader ? styles.centered : undefined}
+      contentContainerStyle={showFullScreenLoader ? styles.centered : styles.content}
     >
       {missingSlug && (
         <Text variant="bodyMedium" style={{ color: theme.colors.error }}>
@@ -124,28 +129,43 @@ export function ResourceSelectScreen({ navigation }: Props) {
       {!showFullScreenLoader &&
         showList &&
         resources.length > 0 &&
-        resources.map((item) => (
-          <Card
-            key={item.id}
-            mode="outlined"
-            style={styles.card}
-            onPress={() => onSelectResource(item.id)}
-            accessibilityLabel={t('resourceSelect.chooseProviderA11y', {
-              name: formatResourceName(item),
-            })}
-          >
-            <View style={styles.cardInner}>
-              <ProviderAvatar resource={item} />
-              <View style={styles.cardTextCol}>
-                <Text variant="titleMedium">{formatResourceName(item)}</Text>
-                <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                  {t('resourceSelect.provider')}
-                </Text>
+        resources.map((item) => {
+          const selected = item.id === resourceId;
+          return (
+            <Card
+              key={item.id}
+              mode="outlined"
+              style={[
+                styles.card,
+                selected && {
+                  borderColor: theme.colors.primary,
+                  backgroundColor: theme.colors.primaryContainer,
+                },
+              ]}
+              onPress={() => onSelectResource(item.id)}
+              accessibilityLabel={t('resourceSelect.chooseProviderA11y', {
+                name: formatResourceName(item),
+              })}
+            >
+              <View style={styles.cardInner}>
+                <ProviderAvatar resource={item} />
+                <View style={styles.cardTextCol}>
+                  <Text variant="titleMedium">{formatResourceName(item)}</Text>
+                  <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                    {t('resourceSelect.provider')}
+                  </Text>
+                </View>
+                <Icon source="chevron-right" size={24} color={theme.colors.onSurfaceVariant} />
               </View>
-              <Icon source="chevron-right" size={24} color={theme.colors.onSurfaceVariant} />
-            </View>
-          </Card>
-        ))}
+            </Card>
+          );
+        })}
+
+      {!showFullScreenLoader && showList && resources.length > 0 && (
+        <PrimaryButton onPress={onContinue} disabled={!resourceId} style={styles.continueBtn}>
+          {t('resourceSelect.continue')}
+        </PrimaryButton>
+      )}
     </BookingStepLayout>
   );
 }
@@ -154,6 +174,9 @@ const styles = StyleSheet.create({
   centered: {
     flexGrow: 1,
     justifyContent: 'center',
+  },
+  content: {
+    flexGrow: 1,
   },
   loaderWrap: {
     minHeight: 200,
@@ -181,5 +204,8 @@ const styles = StyleSheet.create({
   },
   cardTextCol: {
     flex: 1,
+  },
+  continueBtn: {
+    marginTop: 'auto',
   },
 });

@@ -29,6 +29,7 @@
     "emptyList": "No providers are available right now.",
     "provider": "Barber",
     "retry": "Try again",
+    "continue": "Continue",
     "chooseProviderA11y": "Choose provider {{name}}"
   },
   "serviceSelect": {
@@ -38,6 +39,7 @@
     "emptyList": "No services available for this provider.",
     "retry": "Try again",
     "min": "{{count}} min",
+    "continue": "Continue",
     "chooseServiceA11y": "Choose service {{name}}"
   },
   "slotSelect": {

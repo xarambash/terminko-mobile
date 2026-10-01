@@ -4,9 +4,10 @@ import { StatusBar } from 'expo-status-bar';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Button, Text, useTheme } from 'react-native-paper';
+import { Text, useTheme } from 'react-native-paper';
 
 import type { RootStackParamList } from '../navigation/types';
+import { PrimaryButton } from '../components/PrimaryButton';
 import { TENANT_SLUG } from '../constants/env';
 import { fetchTenantBySlug } from '../store/bookingThunks';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
@@ -40,23 +41,20 @@ export function LandingScreen({ navigation }: Props) {
             {t('landing.tagline')}
           </Text>
 
-          <Button
-            mode="contained"
+          <PrimaryButton
             onPress={() => navigation.navigate('ResourceSelect')}
             style={styles.btn}
-            contentStyle={styles.btnContent}
           >
             {t('landing.book')}
-          </Button>
+          </PrimaryButton>
 
-          <Button
+          <PrimaryButton
             mode="outlined"
             onPress={() => navigation.navigate('CancelAppointment')}
             style={styles.btn}
-            contentStyle={styles.btnContent}
           >
             {t('landing.cancel')}
-          </Button>
+          </PrimaryButton>
         </View>
       </View>
     </SafeAreaView>
@@ -97,10 +95,6 @@ const styles = StyleSheet.create({
     marginBottom: 22,
   },
   btn: {
-    borderRadius: 14,
     marginBottom: 12,
-  },
-  btnContent: {
-    paddingVertical: 8,
   },
 });

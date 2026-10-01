@@ -1,12 +1,13 @@
 import { useCallback, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Button, Text, useTheme } from 'react-native-paper';
+import { Text, useTheme } from 'react-native-paper';
 import { StatusBar } from 'expo-status-bar';
 import { useTranslation } from 'react-i18next';
 
 import { cancelAppointment } from '../api/appointments';
 import { getTenantBySlug } from '../api/tenants';
+import { PrimaryButton } from '../components/PrimaryButton';
 import { TENANT_SLUG } from '../constants/env';
 import { FormInput } from '../components/FormInput';
 
@@ -75,16 +76,13 @@ export function CancelAppointmentScreen() {
         </View>
 
         <View style={styles.footer}>
-          <Button
-            mode="contained"
+          <PrimaryButton
             onPress={() => void onCancelAppointment()}
             loading={status === 'loading'}
             disabled={status === 'loading'}
-            style={styles.submitBtn}
-            contentStyle={styles.submitBtnContent}
           >
             {t('cancelAppointment.submit')}
-          </Button>
+          </PrimaryButton>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -106,11 +104,5 @@ const styles = StyleSheet.create({
   footer: {
     paddingHorizontal: 20,
     paddingBottom: 32,
-  },
-  submitBtn: {
-    borderRadius: 12,
-  },
-  submitBtnContent: {
-    paddingVertical: 6,
   },
 });

@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Button, Card, Surface, Text, useTheme } from 'react-native-paper';
 
 import { BookingStepLayout } from '../components/booking-step-layout';
+import { PrimaryButton } from '../components/PrimaryButton';
 import { bookingStepIndex } from '../constants/bookingFlow';
 import type { RootStackParamList } from '../navigation/types';
 import { fetchServices } from '../store/bookingThunks';
@@ -30,7 +31,7 @@ export function ServiceSelectScreen({ navigation }: Props) {
   const { t } = useTranslation();
   const theme = useTheme();
   const dispatch = useAppDispatch();
-  const { tenantId, resourceId, resources, services, servicesStatus, servicesError } =
+  const { tenantId, resourceId, serviceId, resources, services, servicesStatus, servicesError } =
     useAppSelector((s) => s.booking);
 
   const selectedResourceName = useMemo(() => {
@@ -50,12 +51,16 @@ export function ServiceSelectScreen({ navigation }: Props) {
   }, [dispatch, tenantId, resourceId]);
 
   const onSelectService = useCallback(
-    (serviceId: string) => {
-      dispatch(pickService(serviceId));
-      navigation.navigate('SlotSelect');
+    (id: string) => {
+      dispatch(pickService(id));
     },
-    [dispatch, navigation],
+    [dispatch],
   );
+
+  const onContinue = useCallback(() => {
+    if (!serviceId) return;
+    navigation.navigate('SlotSelect');
+  }, [serviceId, navigation]);
 
   const loading = servicesStatus === 'loading';
   const failed = servicesStatus === 'failed' && servicesError;
@@ -67,7 +72,7 @@ export function ServiceSelectScreen({ navigation }: Props) {
       onBack={() => navigation.goBack()}
       backAccessibilityLabel={t('screens.back')}
       pageTitle={t('screens.serviceSelect')}
-      contentContainerStyle={loading ? styles.centered : undefined}
+      contentContainerStyle={loading ? styles.centered : styles.content}
       summary={
         !loading && selectedResourceName ? (
           <ProviderSummaryCard
@@ -103,34 +108,49 @@ export function ServiceSelectScreen({ navigation }: Props) {
       {!loading &&
         showList &&
         services.length > 0 &&
-        services.map((item) => (
-          <Card
-            key={item.id}
-            mode="outlined"
-            style={styles.card}
-            onPress={() => onSelectService(item.serviceId)}
-            accessibilityLabel={t('serviceSelect.chooseServiceA11y', { name: item.service.name })}
-          >
-            <View style={styles.cardInner}>
-              <View style={styles.rowContent}>
-                <Text variant="titleMedium" style={styles.serviceName} numberOfLines={2}>
-                  {item.service.name}
-                </Text>
-                <Text variant="titleMedium" style={{ color: theme.colors.primary }}>
-                  {item.price}
-                </Text>
+        services.map((item) => {
+          const selected = item.serviceId === serviceId;
+          return (
+            <Card
+              key={item.id}
+              mode="outlined"
+              style={[
+                styles.card,
+                selected && {
+                  borderColor: theme.colors.primary,
+                  backgroundColor: theme.colors.primaryContainer,
+                },
+              ]}
+              onPress={() => onSelectService(item.serviceId)}
+              accessibilityLabel={t('serviceSelect.chooseServiceA11y', { name: item.service.name })}
+            >
+              <View style={styles.cardInner}>
+                <View style={styles.rowContent}>
+                  <Text variant="titleMedium" style={styles.serviceName} numberOfLines={2}>
+                    {item.service.name}
+                  </Text>
+                  <Text variant="titleMedium" style={{ color: theme.colors.primary }}>
+                    {item.price}
+                  </Text>
+                </View>
+                {item.service.description ? (
+                  <Text
+                    variant="bodySmall"
+                    style={{ color: theme.colors.onSurfaceVariant, marginTop: 4 }}
+                  >
+                    {item.service.description}
+                  </Text>
+                ) : null}
               </View>
-              {item.service.description ? (
-                <Text
-                  variant="bodySmall"
-                  style={{ color: theme.colors.onSurfaceVariant, marginTop: 4 }}
-                >
-                  {item.service.description}
-                </Text>
-              ) : null}
-            </View>
-          </Card>
-        ))}
+            </Card>
+          );
+        })}
+
+      {!loading && showList && services.length > 0 && (
+        <PrimaryButton onPress={onContinue} disabled={!serviceId} style={styles.continueBtn}>
+          {t('serviceSelect.continue')}
+        </PrimaryButton>
+      )}
     </BookingStepLayout>
   );
 }
@@ -139,6 +159,9 @@ const styles = StyleSheet.create({
   centered: {
     flexGrow: 1,
     justifyContent: 'center',
+  },
+  content: {
+    flexGrow: 1,
   },
   loaderWrap: {
     alignItems: 'center',
@@ -176,5 +199,8 @@ const styles = StyleSheet.create({
   },
   serviceName: {
     flex: 1,
+  },
+  continueBtn: {
+    marginTop: 'auto',
   },
 });

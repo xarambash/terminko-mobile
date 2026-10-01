@@ -2,10 +2,11 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Button, Divider, Surface, Text, useTheme } from 'react-native-paper';
+import { Divider, Surface, Text, useTheme } from 'react-native-paper';
 import { format, parseISO } from 'date-fns';
 
 import { BookingStepLayout } from '../components/booking-step-layout';
+import { PrimaryButton } from '../components/PrimaryButton';
 import { bookingStepIndex } from '../constants/bookingFlow';
 import type { RootStackParamList } from '../navigation/types';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
@@ -45,6 +46,7 @@ export function ConfirmationScreen({ navigation }: Props) {
       onBack={onBackHome}
       backAccessibilityLabel={t('confirmation.backHome')}
       safeAreaEdges={['top', 'left', 'right', 'bottom']}
+      contentContainerStyle={styles.content}
     >
       <View style={styles.hero}>
         <View style={[styles.checkBadge, { backgroundColor: theme.colors.primaryContainer }]}>
@@ -73,19 +75,20 @@ export function ConfirmationScreen({ navigation }: Props) {
         </Surface>
       )}
 
-      <Button
-        mode="contained"
+      <PrimaryButton
         onPress={onBackHome}
         style={styles.homeBtn}
-        contentStyle={styles.homeBtnContent}
       >
         {t('confirmation.backHome')}
-      </Button>
+      </PrimaryButton>
     </BookingStepLayout>
   );
 }
 
 const styles = StyleSheet.create({
+  content: {
+    flexGrow: 1,
+  },
   hero: {
     alignItems: 'center',
     marginBottom: 24,
@@ -120,9 +123,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   homeBtn: {
-    borderRadius: 32,
-  },
-  homeBtnContent: {
-    paddingVertical: 6,
+    marginTop: 'auto',
   },
 });

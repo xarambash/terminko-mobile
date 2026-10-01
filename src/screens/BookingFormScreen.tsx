@@ -2,11 +2,12 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Button, Divider, Surface, Text, useTheme } from 'react-native-paper';
+import { Divider, Surface, Text, useTheme } from 'react-native-paper';
 import { format, parseISO } from 'date-fns';
 
 import { BookingStepLayout } from '../components/booking-step-layout';
 import { FormInput } from '../components/FormInput';
+import { PrimaryButton } from '../components/PrimaryButton';
 import { bookingStepIndex } from '../constants/bookingFlow';
 import type { RootStackParamList } from '../navigation/types';
 import { submitBooking } from '../store/bookingThunks';
@@ -200,16 +201,13 @@ export function BookingFormScreen({ navigation }: Props) {
             {t('bookingForm.afterSubmitHint')}
           </Text>
 
-          <Button
-            mode="contained"
+          <PrimaryButton
             onPress={onSubmit}
             loading={submitting}
             disabled={submitting}
-            style={styles.submitBtn}
-            contentStyle={styles.submitBtnContent}
           >
             {submitting ? t('bookingForm.submitting') : t('bookingForm.submit')}
-          </Button>
+          </PrimaryButton>
         </View>
       </BookingStepLayout>
     </KeyboardAvoidingView>
@@ -258,11 +256,5 @@ const styles = StyleSheet.create({
   },
   hint: {
     textAlign: 'center',
-  },
-  submitBtn: {
-    borderRadius: 12,
-  },
-  submitBtnContent: {
-    paddingVertical: 4,
   },
 });

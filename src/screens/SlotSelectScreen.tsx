@@ -7,6 +7,7 @@ import { format, parseISO } from 'date-fns';
 import { Calendar } from 'react-native-calendars';
 
 import { BookingStepLayout } from '../components/booking-step-layout';
+import { PrimaryButton } from '../components/PrimaryButton';
 import { TimeSlotGrid, type TimeSlotItem } from '../components/TimeSlotGrid';
 import { bookingStepIndex } from '../constants/bookingFlow';
 import type { RootStackParamList } from '../navigation/types';
@@ -235,15 +236,13 @@ export function SlotSelectScreen({ navigation }: Props) {
       )}
 
       {selectedDate && showSlots && slots.length > 0 && (
-        <Button
-          mode="contained"
+        <PrimaryButton
           onPress={onContinue}
           disabled={!pendingSlot}
           style={styles.continueBtn}
-          contentStyle={styles.continueBtnContent}
         >
           {t('slotSelect.continue')}
-        </Button>
+        </PrimaryButton>
       )}
     </BookingStepLayout>
   );
@@ -267,10 +266,6 @@ const styles = StyleSheet.create({
   },
   continueBtn: {
     marginTop: 8,
-    borderRadius: 32,
-  },
-  continueBtnContent: {
-    paddingVertical: 2,
   },
   summaryCard: {
     flexDirection: 'row',
