@@ -21,27 +21,27 @@ There is no public install yet. Run it locally with Expo Go.
 
 ### Home
 
-![Home](docs/screenshots/home.png)
+<img src="docs/screenshots/home.png" alt="Home" width="280">
 
 ### Provider
 
-![Provider](docs/screenshots/provider.png)
+<img src="docs/screenshots/provider.png" alt="Provider" width="280">
 
 ### Service
 
-![Service](docs/screenshots/service.png)
+<img src="docs/screenshots/service.png" alt="Service" width="280">
 
 ### Date and time
 
-![Date and time](docs/screenshots/datetime.png)
+<img src="docs/screenshots/datetime.png" alt="Date and time" width="280">
 
 ### Booking overview
 
-![Booking overview](docs/screenshots/overview.png)
+<img src="docs/screenshots/overview.png" alt="Booking overview" width="280">
 
 ### Confirmation
 
-![Confirmation](docs/screenshots/confirmation.png)
+<img src="docs/screenshots/confirmation.png" alt="Confirmation" width="280">
 
 ---
 
