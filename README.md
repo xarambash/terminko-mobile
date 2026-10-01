@@ -19,29 +19,20 @@ There is no public install yet. Run it locally with Expo Go.
 
 ## Screenshots
 
-### Home
-
-<img src="docs/screenshots/home.png" alt="Home" width="280">
-
-### Provider
-
-<img src="docs/screenshots/provider.png" alt="Provider" width="280">
-
-### Service
-
-<img src="docs/screenshots/service.png" alt="Service" width="280">
-
-### Date and time
-
-<img src="docs/screenshots/datetime.png" alt="Date and time" width="280">
-
-### Booking overview
-
-<img src="docs/screenshots/overview.png" alt="Booking overview" width="280">
-
-### Confirmation
-
-<img src="docs/screenshots/confirmation.png" alt="Confirmation" width="280">
+<table>
+  <tr>
+    <td align="center"><strong>Home</strong><br><img src="docs/screenshots/home.png" alt="Home" width="260"></td>
+    <td align="center"><strong>Provider</strong><br><img src="docs/screenshots/provider.png" alt="Provider" width="260"></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Service</strong><br><img src="docs/screenshots/service.png" alt="Service" width="260"></td>
+    <td align="center"><strong>Date and time</strong><br><img src="docs/screenshots/datetime.png" alt="Date and time" width="260"></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Booking overview</strong><br><img src="docs/screenshots/overview.png" alt="Booking overview" width="260"></td>
+    <td align="center"><strong>Confirmation</strong><br><img src="docs/screenshots/confirmation.png" alt="Confirmation" width="260"></td>
+  </tr>
+</table>
 
 ---
 
