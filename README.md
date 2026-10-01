@@ -23,12 +23,10 @@ There is no public install yet. Run it locally with Expo Go.
   <tr>
     <td align="center"><strong>Home</strong><br><img src="docs/screenshots/home.png" alt="Home" width="260"></td>
     <td align="center"><strong>Provider</strong><br><img src="docs/screenshots/provider.png" alt="Provider" width="260"></td>
-  </tr>
-  <tr>
     <td align="center"><strong>Service</strong><br><img src="docs/screenshots/service.png" alt="Service" width="260"></td>
-    <td align="center"><strong>Date and time</strong><br><img src="docs/screenshots/datetime.png" alt="Date and time" width="260"></td>
   </tr>
   <tr>
+    <td align="center"><strong>Date and time</strong><br><img src="docs/screenshots/datetime.png" alt="Date and time" width="260"></td>
     <td align="center"><strong>Booking overview</strong><br><img src="docs/screenshots/overview.png" alt="Booking overview" width="260"></td>
     <td align="center"><strong>Confirmation</strong><br><img src="docs/screenshots/confirmation.png" alt="Confirmation" width="260"></td>
   </tr>
